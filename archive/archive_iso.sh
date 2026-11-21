@@ -10,6 +10,7 @@
 #   iso/        DSEP per-mass iso files (iso_m*.feh*.gz), one tar per run, as DSEP3 writes them (rebuild isochrones with pyeep)
 #   isochrones/ the built isochrones the sCMD pipeline reads (<run>/isos/isochrones_example.txt), one .tar.xz per set
 #   var/        the Monte Carlo var files of each grid
+#   obs/        observational inputs the fits read (M15 and 47 Tuc star catalogs and artificial-star tests)
 # Usage: sbatch archive_iso.sh [item ...]   (default: every item except tuc4, which waits for the 47 Tuc DSEP4 grid)
 # Copies only; never deletes from scratch. Each item is checked (file counts, archive integrity) and logged.
 set -uo pipefail
@@ -65,6 +66,17 @@ pack_isochrones() {   # name parent set_dir [pattern]
   record $name $out "$parent/$set/.../$pat" "$na of $ns files, spot check $f1 $same, $(du -sh $out | cut -f1)"
 }
 
+# observational inputs (catalogs, artificial-star tests): one .tar.xz of the listed paths (relative to parent), as they are
+pack_paths() {   # name parent path ...
+  local name=$1 parent=$2; shift 2; local out=$G/obs/$name.tar.xz ns na f1 same; free_ok; mkdir -p $G/obs
+  ns=$(cd $parent && find "$@" -type f | wc -l)
+  (cd $parent && find "$@" -type f -print0 | sort -z | tar --null -T - -cf -) | xz -T$T -6 > $out.tmp && mv $out.tmp $out
+  na=$(xz -T$T -dc $out | tar -tf - | wc -l)
+  f1=$(xz -dc $out | tar -tf - | head -1)
+  same=$(cmp -s <(xz -dc $out | tar -xOf - "$f1") $parent/$f1 && echo identical || echo DIFFERENT)
+  record $name $out "$parent: $*" "$na of $ns files, spot check $f1 $same, $(du -sh $out | cut -f1)"
+}
+
 pack_var() {   # name src_dir
   local out=$G/var/$1.tar.xz; free_ok
   (cd $(dirname $2) && tar -cf - $(basename $2)) | xz -T$T -6 > $out.tmp && mv $out.tmp $out
@@ -86,6 +98,9 @@ for it in $ITEMS; do
     m15)      pack_runs m15_dsep4_mc $S/M15/tracks_dsep4mc feh227
               pack_isochrones m15_dsep4_mc $S/M15 iso_dsep4mc ;;
     tuc3_10k) pack_isochrones 47tuc_dsep3_10k_dsepformat $S 47Tuc_iso 'feh077*' ;;
+    obs)      pack_paths obs_m15_47tuc $S Files_from_Martin/47Tuc_data Files_from_Martin/M15_data Files_from_Martin/NGC0104.47T \
+                Files_from_Martin/Photometry/47Tuc_inputfiles Files_from_Martin/Photometry/M15_inputfiles \
+                M15/NGC7078.M15 scmd_tb/m15_grid_d4/inputs scmd_tb/hugs/47Tuc_hugs_meth2.dat ;;
     tuc4)     pack_runs 47tuc_dsep4_mc $S/Tracks_tuc_dsep4_mcfix feh077
               pack_isochrones 47tuc_dsep4_mc $S/scmd_tb tuc_iso_d4v2_mcfix ;;
     *)        say "unknown item $it" ;;

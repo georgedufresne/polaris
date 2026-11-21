@@ -61,7 +61,7 @@ analysis_W14	NOT_KEPT	NGC 6791 W v1.4 fit tables (small; created when the W14 ru
 2d_ks_emul	NOT_KEPT	NGC 6791 per-run KS results (small)
 2d_ks_W	NOT_KEPT	NGC 6791 per-run KS results (small)
 2d_ks_W14	NOT_KEPT	NGC 6791 per-run KS results (small)
-Files_from_Martin	NOT_KEPT	Martin Ying's files (star files, inputs, his code); 0.8 GB
+Files_from_Martin	NOT_KEPT	HOLDS THE M15 + 47 Tuc OBSERVED CATALOGS AND ASTs the fits read (0.62 GB data; rest = his code + clone of his public GitHub repo); archive item "obs" ready, awaiting OK
 EEP_options_reference.txt	NOT_KEPT	notes (text)
 scmd_3way_comparison.txt	NOT_KEPT	result summary (text)
 scmd_4way_comparison.txt	NOT_KEPT	result summary (text)
