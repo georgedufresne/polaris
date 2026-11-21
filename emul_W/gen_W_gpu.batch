@@ -1,0 +1,19 @@
+#!/bin/bash -l
+#SBATCH --job-name=genW_gpu
+#SBATCH --output=/dartfs-hpc/scratch/f007058/emul_W/logs/gpu_%A_%a.out
+#SBATCH --error=/dartfs-hpc/scratch/f007058/emul_W/logs/gpu_%A_%a.err
+#SBATCH --mem=24G
+#SBATCH --time=08:00:00
+#SBATCH --partition=gpu_preempt
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=4
+#SBATCH --requeue
+#SBATCH --array=0-9%10
+source /optnfs/common/miniconda3/etc/profile.d/conda.sh
+conda activate fidanka-env
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+nvidia-smi --query-gpu=name --format=csv,noheader
+S=$(( 20000 + SLURM_ARRAY_TASK_ID * 100 ))
+echo "task $SLURM_ARRAY_TASK_ID -> runs $S..$((S+99))  $(date '+%F %T')"
+python3 /dartfs-hpc/scratch/f007058/emul_W/gen_W_iso.py $(seq $S $((S+99))) --device cuda
+echo "done $(date '+%F %T')"

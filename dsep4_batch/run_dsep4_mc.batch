@@ -1,0 +1,22 @@
+#!/bin/bash -l
+#SBATCH --job-name=dsep4_mc
+#SBATCH --output=/dartfs-hpc/scratch/f007058/dsep4_batch/logs_mc/%A_%a.out
+#SBATCH --error=/dartfs-hpc/scratch/f007058/dsep4_batch/logs_mc/%A_%a.err
+#SBATCH --mem=4G
+#SBATCH --time=12:00:00
+#SBATCH --account=physics
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --nodes=1
+#SBATCH --array=1-39
+#SBATCH --mail-user=george.e.dufresne.gr@dartmouth.edu
+#SBATCH --mail-type=FAIL
+
+W=/dartfs-hpc/scratch/f007058/dsep4_batch
+read -r RUN FEH MASS <<< "$(sed -n "${SLURM_ARRAY_TASK_ID}p" $W/tasks_mc20000.txt)"
+echo "task $SLURM_ARRAY_TASK_ID -> run $RUN  feh $FEH  mass $MASS   start $(date '+%F %T')"
+cd /dartfs-hpc/rc/home/8/f007058/mcdsep/run
+./runmc_dsep4_mc_one.sh "$RUN" "$FEH" "$MASS"
+rc=$?
+echo "done rc=$rc $(date '+%F %T')"
+exit $rc

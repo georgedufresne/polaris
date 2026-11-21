@@ -1,0 +1,12 @@
+{
+ "iso": "/dartfs-hpc/scratch/f007058/Isochrones_W/{run}/isos/isochrones_example.txt",
+ "obs": "/dartfs-hpc/scratch/f007058/scmd_tb/w500/code/data/ngc6791/obs_referee_chaboyer_DM13.280_EBV0.200_age8.3Gyr_001.csv",
+ "completeness": "/dartfs-hpc/scratch/f007058/scmd_tb/w500/code/data/ngc6791/completeness.csv",
+ "scatter_red": "/dartfs-hpc/scratch/f007058/scmd_tb/w500/code/data/ngc6791/scatter_red.csv",
+ "scatter_blue": "/dartfs-hpc/scratch/f007058/scmd_tb/w500/code/data/ngc6791/scatter_blue.csv",
+ "bc": "/dartfs-hpc/scratch/f007058/scmd_tb/w500/code/data/ngc6791/bc_mist_gaia_edr3_fehm300.npz",
+ "exact_age": false,
+ "keep": 4,
+ "chunk": 9,
+ "ks_3sigma": 0.0468
+}

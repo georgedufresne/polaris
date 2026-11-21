@@ -1,0 +1,56 @@
+#!/bin/bash -l
+#SBATCH --job-name=tuc_d4mc
+#SBATCH --mem-per-cpu=1G
+#SBATCH --time=24:00:00
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --nodes=1
+#SBATCH --output=/dartfs-hpc/scratch/f007058/tuc_dsep4_batch/logs/%x_%A_%a.out
+#SBATCH --mail-user=george.e.dufresne.gr@dartmouth.edu
+#SBATCH --mail-type=FAIL
+# Second rerun (2026-11-01): the 42 runs that lost masses in the 2026-10-29 ~18:25-18:53
+# "Permission denied" window (plus 10339, still missing 0.64 Msun), built afterwards with
+# the fixed pyeep settings (tuc_d4v2_build/build_tuc_d4_iso_v2.sh). Original header:
+# Rerun of 47 Tuc DSEP4 runs that lost masses when the jobs briefly could not
+# read /dartfs-hpc/rc/home (2026-10-29 00:46-00:59, "Permission denied" on
+# runtuc_dsep4_mc_one.sh). Same physics and retry as run_tuc_dsep4_mc.batch, but:
+#  - masses that already have a non-empty track are left alone (no status line);
+#  - a track that crashed at the helium flash (final He core >= 0.40 Msun and
+#    log L >= 3.0, i.e. it reached the RGB tip like the clean tracks) is kept
+#    without the pointless massdep retry.
+# The run's isochrones must be deleted before submitting so they are rebuilt.
+R=$SLURM_ARRAY_TASK_ID
+B=/dartfs-hpc/scratch/f007058/tuc_dsep4_batch
+T=/dartfs-hpc/scratch/f007058/Tracks_tuc_dsep4_mc/$R
+export NML=/dartfs-hpc/rc/home/8/f007058/nml_dsep4_mc
+mkdir -p $T $B/logs/mass
+echo "run $R rerun start $(date '+%F %T') on $(hostname)"
+cd /dartfs-hpc/rc/home/8/f007058/mcdsep/run
+nlines() { zcat "$1" 2>/dev/null | wc -l; }
+at_tip() { zcat "$1" 2>/dev/null | awk 'NF>20{l=$0} END{split(l,a); exit !(a[4]+0 >= 0.40 && a[6]+0 >= 3.0)}'; }
+for M in $(seq 200 40 690) $(seq 700 50 1400) $(seq 1500 100 1900) $(seq 2000 200 3000); do
+  if (( M < 1000 )); then mp=0$M; else mp=$M; fi
+  trk=$T/m$mp.feh077.$R.gz; iso=$T/iso_m$mp.feh077.$R.gz
+  [ -n "$(zcat $trk 2>/dev/null | head -c 1)" ] && continue
+  t0=$(date +%s)
+  ./runtuc_dsep4_mc_one.sh $R -0.77 $M > $B/logs/mass/$R.$M.rerun.log 2>&1; c0=$?
+  used=standard; c1=-
+  if [ $c0 -eq 3 ] && at_tip $trk; then
+    used=standard_tip
+  elif [ $c0 -ne 0 ]; then
+    [ -f $trk ] && mv -f $trk $trk.try0 && { [ -f $iso ] && mv -f $iso $iso.try0; }
+    START=massdep ./runtuc_dsep4_mc_one.sh $R -0.77 $M > $B/logs/mass/$R.$M.rerun.massdep.log 2>&1; c1=$?
+    used=massdep
+    if [ -f $trk.try0 ]; then
+      if [ "$(nlines $trk.try0)" -gt "$(nlines $trk)" ]; then
+        mv -f $trk.try0 $trk; [ -f $iso.try0 ] && mv -f $iso.try0 $iso; used=standard_partial
+      else
+        rm -f $trk.try0 $iso.try0
+      fi
+    fi
+  fi
+  echo "$M standard_rc=$c0 massdep_rc=$c1 kept=$used lines=$(nlines $trk) rerun" >> $T/status.txt
+  echo "  mass $M standard_rc=$c0 massdep_rc=$c1 kept=$used $(( $(date +%s) - t0 ))s"
+done
+/dartfs-hpc/scratch/f007058/scmd_tb/tuc_d4v2_build/build_tuc_d4_iso_v2.sh $R
+echo "run $R end $(date '+%F %T')"

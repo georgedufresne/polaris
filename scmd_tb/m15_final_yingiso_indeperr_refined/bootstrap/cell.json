@@ -1,0 +1,9 @@
+{
+ "simulation_id": 10485,
+ "age_gyr": 12.8,
+ "distance_modulus": 15.41,
+ "extinction_ebv": 0.055,
+ "n": 10000,
+ "resample_ast": true,
+ "fresh_reference": true
+}

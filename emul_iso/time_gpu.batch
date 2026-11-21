@@ -1,0 +1,18 @@
+#!/bin/bash -l
+#SBATCH --job-name=emul_tg
+#SBATCH --output=/dartfs-hpc/scratch/f007058/emul_iso/logs/timegpu_%j.out
+#SBATCH --error=/dartfs-hpc/scratch/f007058/emul_iso/logs/timegpu_%j.err
+#SBATCH --mem=32G
+#SBATCH --time=00:40:00
+#SBATCH --partition=gpu_preempt
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=4
+source /optnfs/common/miniconda3/etc/profile.d/conda.sh
+conda activate fidanka-env
+export PYTHONPATH=/dartfs-hpc/rc/home/8/f007058/CONF1DENCE
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
+cd /dartfs-hpc/scratch/f007058/emul_iso
+echo "--- 64 draws x 5000 masses, 2 runs ---"
+time python3 gen_emul_iso.py 20000 20001 --device cuda --n-mass 5000 --mass-low 0.25 \
+    --n-draws 64 --batch 256000 --outdir /dartfs-hpc/scratch/f007058/Isochrones_emul_medoid

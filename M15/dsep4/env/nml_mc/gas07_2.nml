@@ -1,0 +1,27 @@
+
+ LOPAL95=.TRUE.
+ FO95COBIN='/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/OPAL/OPAL_AGS04.bin'
+
+ LALEX95=.TRUE.
+
+ MIX='GA07'
+ IAFE=0
+
+ LZAMS=.FALSE. 
+ LHB  =.FALSE.
+ LTRACK=.TRUE.
+ LISO=.TRUE.
+ LCORR=.TRUE.          
+ LRWSH=.TRUE.         
+ LDATA=.TRUE.
+
+ OPECALEX(1) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/ags04.0.tron'
+ OPECALEX(2) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/ags04.1.tron'
+ OPECALEX(3) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/ags04.2.tron'
+ OPECALEX(4) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/ags04.35.tron'
+ OPECALEX(5) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/ags04.5.tron'
+ OPECALEX(6) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/ags04.7.tron'
+ OPECALEX(7) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/ags04.8.tron'
+ OPECALEX(8) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/ags04.9.tron'
+
+ $END

@@ -1,0 +1,14 @@
+ $CONTROL
+
+ DESCRIP(1) = 'GS98 composition'
+ DESCRIP(2) = 'Dartmouth Stellar Evolution Code' 
+
+ NUMRUN=2
+
+ KINDRN(1)=2
+ LFIRST(1)=.TRUE.
+ NMODLS(1)=2
+
+ KINDRN(2)=1
+ LFIRST(2)=.FALSE.
+

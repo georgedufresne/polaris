@@ -1,0 +1,18 @@
+#!/bin/bash -l
+#SBATCH --job-name=gen_W14
+#SBATCH --output=/dartfs-hpc/scratch/f007058/emul_W14/logs/gen_%A_%a.out
+#SBATCH --mem=12G
+#SBATCH --time=24:00:00
+#SBATCH --account=physics
+#SBATCH --cpus-per-task=4
+#SBATCH --nodes=1
+# W v1.4 NGC 6791 isochrones for runs 20000-20999 (gen_W14_iso.py; as ../emul_W/gen_W.batch for v1.2).
+# Submit with --array=0-(NT-1)%10 and --export=ALL,NT=<tasks>: task k takes runs 20000+k, 20000+k+NT, ... (interleaved,
+# so a resubmission skips finished runs and the tasks stay balanced). 10 at once x 4 CPUs = 40 physics CPUs.
+source /optnfs/common/miniconda3/etc/profile.d/conda.sh
+conda activate fidanka-env
+export OMP_NUM_THREADS=4
+RUNS=$(seq $((20000 + SLURM_ARRAY_TASK_ID)) ${NT:?} 20999)
+echo "task $SLURM_ARRAY_TASK_ID -> $(echo $RUNS | wc -w) runs  $(date '+%F %T')"
+python /dartfs-hpc/scratch/f007058/emul_W14/gen_W14_iso.py $RUNS --outdir /dartfs-hpc/scratch/f007058/Isochrones_W14
+echo "done $(date '+%F %T')"

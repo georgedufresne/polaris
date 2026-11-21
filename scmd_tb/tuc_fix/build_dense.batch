@@ -1,0 +1,11 @@
+#!/bin/bash
+#SBATCH --job-name=tuc_dense_iso
+#SBATCH --account=physics
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=8G
+#SBATCH --time=03:00:00
+#SBATCH --array=0-1
+#SBATCH --output=/dartfs-hpc/scratch/f007058/scmd_tb/tuc_fix/dense_run/build_%A_%a.out
+export HOME=/dartfs-hpc/scratch/f007058
+R=$( [ $SLURM_ARRAY_TASK_ID -eq 0 ] && echo 10091 || echo 10046 )
+/dartfs-hpc/scratch/f007058/scmd_tb/tuc_fix/build_tuc_dense.sh $R

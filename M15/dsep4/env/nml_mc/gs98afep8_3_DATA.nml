@@ -1,0 +1,42 @@
+
+ DESCRIP(1) = 'GS98 composition with [alpha/Fe] = +0.8'
+ DESCRIP(2) = 'Dartmouth Stellar Evolution Code' 
+
+ NUMRUN=2
+
+ KINDRN(1)=2
+ LFIRST(1)=.TRUE.
+ NMODLS(1)=2
+
+ KINDRN(2)=1
+ LFIRST(2)=.FALSE.
+
+
+ LOPAL95=.TRUE.
+ FO95COBIN='/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/OPAL/OPAL_GS98_AFE8.bin'
+
+ LALEX95=.TRUE.
+
+ MIX='GS98'
+ IAFE=8
+
+ LZAMS=.FALSE. 
+ LHB  =.FALSE.
+ LTRACK=.TRUE.
+ LDATA=.TRUE.
+ LCORR=.TRUE.          
+ LRWSH=.TRUE.         
+ LISO=.TRUE.
+
+ OPECALEX(1) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/gs98+.8.0.tron'
+ OPECALEX(2) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/gs98+.8.1.tron'
+ OPECALEX(3) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/gs98+.8.2.tron'
+ OPECALEX(4) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/gs98+.8.35.tron'
+ OPECALEX(5) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/gs98+.8.5.tron'
+ OPECALEX(6) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/gs98+.8.7.tron'
+ OPECALEX(7) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/gs98+.8.8.tron'
+ OPECALEX(8) = '/dartfs-hpc/scratch/f007058/M15/dsep4/env/DSEPmisc/opac/ferg04/gs98+.8.9.tron'
+
+ LMonteCarlo=.TRUE.
+
+ $END

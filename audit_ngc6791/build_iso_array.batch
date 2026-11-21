@@ -1,0 +1,13 @@
+#!/bin/bash -l
+#SBATCH --job-name=build_iso
+#SBATCH --output=/dartfs-hpc/scratch/f007058/audit_ngc6791/pyeep_work/logs/biso_%A_%a.out
+#SBATCH --mem=3G
+#SBATCH --time=4:00:00
+#SBATCH --account=physics
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --nodes=1
+#SBATCH --array=0-110%114
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=george.e.dufresne.gr@dartmouth.edu
+bash /dartfs-hpc/scratch/f007058/audit_ngc6791/build_iso_task.sh $SLURM_ARRAY_TASK_ID 9

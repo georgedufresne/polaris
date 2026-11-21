@@ -1,0 +1,94 @@
+{
+ "params": [
+  "ctx",
+  "run",
+  "age",
+  "dm",
+  "ebv",
+  "ids",
+  "log",
+  "split_ast"
+ ],
+ "gaia_default": [
+  {
+   "ks_statistic": 0.022478192507185663,
+   "js_divergence": 0.036720512865335404,
+   "mean_diff": 0.008772115357569884,
+   "p95_diff": 0.022478192507185663,
+   "n_observed": 1120,
+   "n_simulated": 1111,
+   "bootstrap_number": 0,
+   "simulation_id": 20001,
+   "age_gyr": 8.3,
+   "distance_modulus": 13.28,
+   "extinction_ebv": 0.13
+  },
+  {
+   "ks_statistic": 0.026069401534830734,
+   "js_divergence": 0.022988004718341053,
+   "mean_diff": 0.010510721289302546,
+   "p95_diff": 0.026069401534830734,
+   "n_observed": 1120,
+   "n_simulated": 1107,
+   "bootstrap_number": 1,
+   "simulation_id": 20001,
+   "age_gyr": 8.3,
+   "distance_modulus": 13.28,
+   "extinction_ebv": 0.13
+  },
+  {
+   "ks_statistic": 0.03404035942436082,
+   "js_divergence": 0.03903321378342687,
+   "mean_diff": 0.011056758069017913,
+   "p95_diff": 0.03404035942436082,
+   "n_observed": 1120,
+   "n_simulated": 1119,
+   "bootstrap_number": 2,
+   "simulation_id": 20001,
+   "age_gyr": 8.3,
+   "distance_modulus": 13.28,
+   "extinction_ebv": 0.13
+  },
+  {
+   "ks_statistic": 0.030100692472781094,
+   "js_divergence": 0.02253278658987492,
+   "mean_diff": 0.01094570849599076,
+   "p95_diff": 0.030100692472781094,
+   "n_observed": 1120,
+   "n_simulated": 1120,
+   "bootstrap_number": 3,
+   "simulation_id": 20001,
+   "age_gyr": 8.3,
+   "distance_modulus": 13.28,
+   "extinction_ebv": 0.13
+  }
+ ],
+ "tuc_shared": [
+  {
+   "ks_statistic": 0.0037687564133032205,
+   "js_divergence": 0.005619885208137743,
+   "mean_diff": 0.0017218056579984906,
+   "p95_diff": 0.0037687564133032205,
+   "n_observed": 47413,
+   "n_simulated": 47413,
+   "bootstrap_number": 0,
+   "simulation_id": 10099,
+   "age_gyr": 11.4,
+   "distance_modulus": 13.38,
+   "extinction_ebv": 0.015
+  },
+  {
+   "ks_statistic": 0.0033217254395586093,
+   "js_divergence": 0.005959990115995102,
+   "mean_diff": 0.0014961872339880231,
+   "p95_diff": 0.0033217254395586093,
+   "n_observed": 47413,
+   "n_simulated": 47413,
+   "bootstrap_number": 1,
+   "simulation_id": 10099,
+   "age_gyr": 11.4,
+   "distance_modulus": 13.38,
+   "extinction_ebv": 0.015
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+#!/bin/bash -l
+#SBATCH --job-name=scmdW_physics
+#SBATCH --output=/dartfs-hpc/scratch/f007058/scmd_emul_pipeline/logs/physics_%A_%a.out
+#SBATCH --error=/dartfs-hpc/scratch/f007058/scmd_emul_pipeline/logs/physics_%A_%a.err
+#SBATCH --mem=4G
+#SBATCH --time=48:00:00
+#SBATCH --account=physics
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --nodes=1
+#SBATCH --array=0-284%240
+#SBATCH --mail-user=george.e.dufresne.gr@dartmouth.edu
+#SBATCH --mail-type=FAIL
+
+module load python/anaconda3
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate fidanka-env
+
+W=/dartfs-hpc/scratch/f007058/scmd_emul_pipeline
+cd $W
+
+ID=$(sed -n "$((SLURM_ARRAY_TASK_ID + 1))p" $W/runs_physics.txt)
+echo "task $SLURM_ARRAY_TASK_ID -> run $ID   start $(date '+%F %T')"
+
+# skip if this run already has its KS result (makes requeue cheap)
+if [ -s /dartfs-hpc/scratch/f007058/2d_ks_W/2d_ks_results_$ID.csv ]; then
+    echo "run $ID already done"; exit 0
+fi
+
+for AGE in $(seq 4.0 0.1 12.0); do
+    python scmd_grid_red_dist_chaboyer_g_err_3err_test_emul.py $ID $AGE
+    python kde_code_for_grid_best_match_chaboyer_test_emul.py  $ID $AGE
+done
+
+python 2d_ks_comparison_grid_chaboyer_kde_emul.py $ID
+echo "done $(date '+%F %T')"

@@ -1,0 +1,16 @@
+{
+ "simulation_id": 10027,
+ "age_gyr": 12.8,
+ "distance_modulus": 15.47,
+ "extinction_ebv": 0.081,
+ "n": 10000,
+ "resample_ast": true,
+ "fresh_reference": true,
+ "ks_mean": 0.007588747125536823,
+ "ks_std": 0.002334683108707728,
+ "ks_median": 0.0071406467124198,
+ "ks_min": 0.0033119908964852,
+ "ks_max": 0.0203283872003326,
+ "ks_3sigma": 0.014592796451660006,
+ "missing": 0
+}

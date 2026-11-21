@@ -1,0 +1,72 @@
+#!/bin/bash
+#SBATCH --job-name=tuc_d4fix
+#SBATCH --mem-per-cpu=1G
+#SBATCH --time=24:00:00
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --nodes=1
+#SBATCH --output=/dartfs-hpc/scratch/f007058/tuc_dsep4_batch/logs_mcfix/%x_%A_%a.out
+#SBATCH --mail-user=george.e.dufresne.gr@dartmouth.edu
+#SBATCH --mail-type=FAIL
+# 47 TUC (2026-11-19): copy of M15/dsep4/run_m15_dsep4mc.batch for the 1000 47 Tuc DSEP4 runs, whose [alpha/Fe] 0.2/0.4
+# var files were never read (~/nml_dsep4_mc set LMonteCarlo only for [alpha/Fe] = 0). Same scratch env and fixed
+# namelists as the M15 rerun (M15/dsep4/env, env/nml_mc; binary, run helpers and namelists checked identical to the home
+# originals the 47 Tuc runs used, apart from paths); run script run_tuc_dsep4_one_scratch.sh (run_m15_dsep4_one.sh with
+# GC_name, vardir = scmd_tb/tuc_d4v2_build/var (= ~/mcdsep/MC_var_tuc_d4), work dir and default output changed);
+# [Fe/H] -0.77; tracks -> Tracks_tuc_dsep4_mcfix, isochrones with the 47 Tuc v2 builder -> scmd_tb/tuc_iso_d4v2_mcfix.
+# M15 header follows.
+# 2026-11-18 RERUN WITH THE MONTE CARLO READ FIXED (copy of run_m15_dsep4.batch). The original run's [alpha/Fe] != 0
+# control namelists did not set LMonteCarlo, so 484 of 500 runs never read their var file (mread). This copy uses
+# env/nml_mc (= env/nml + LMonteCarlo=.TRUE. in the five alpha-enhanced *_3_DATA.nml) via NML, writes tracks to
+# M15/tracks_dsep4mc and isochrones to M15/iso_dsep4mc, logs to logs_mcfix/. Var files unchanged (ALPHAC = 0).
+# Original header follows.
+# One M15 var set per task: DSEP4, Monte Carlo mode ON, the 39 masses of the 47 Tuc
+# DSEP3/DSEP4 sets, then its isochrones (build_m15_iso.sh). Submit with --account and
+# --array; the array index IS the run number. As tuc_dsep4_batch/run_tuc_dsep4_mc.batch
+# (+ the rerun's helium-flash rule), except that everything it reads is a copy on scratch
+# (dsep4/env: DSEPmisc, dsep4 bin + opac, namelists with scratch paths, run helpers; var/:
+# the M15 var files with ALPHAC = 0 and deboercoef = 1, as the 47 Tuc DSEP4 set), so no
+# task needs a Kerberos ticket for /dartfs-hpc/rc -- the cause of the 47 Tuc "Permission
+# denied" losses. Plain bash (no login shell) and LD_LIBRARY_PATH cleared, so dsep loads
+# the libfree_eos next to it ($ORIGIN).
+#  - standard pre-MS seed first; a crash at the helium flash after the RGB tip (final He
+#    core >= 0.40 Msun and log L >= 3.0) is kept as is; any other failure is rerun once
+#    from the mass-dependent seed (START=massdep) and the longer track is kept;
+#  - masses that already have a non-empty track are skipped, so a task can be resubmitted;
+#  - every outcome goes to tracks_dsep4/<run>/status.txt.
+R=$SLURM_ARRAY_TASK_ID
+D=/dartfs-hpc/scratch/f007058/tuc_dsep4_batch
+T=/dartfs-hpc/scratch/f007058/Tracks_tuc_dsep4_mcfix/$R
+export HOME=/dartfs-hpc/scratch/f007058 LD_LIBRARY_PATH= NML=/dartfs-hpc/scratch/f007058/M15/dsep4/env/nml_mc STOREBASE=/dartfs-hpc/scratch/f007058/Tracks_tuc_dsep4_mcfix
+mkdir -p $T $D/logs_mcfix/mass
+echo "run $R start $(date '+%F %T') on $(hostname)"
+cd $D
+nlines() { zcat "$1" 2>/dev/null | wc -l; }
+at_tip() { zcat "$1" 2>/dev/null | awk 'NF>20{l=$0} END{split(l,a); exit !(a[4]+0 >= 0.40 && a[6]+0 >= 3.0)}'; }
+for M in $(seq 200 40 690) $(seq 700 50 1400) $(seq 1500 100 1900) $(seq 2000 200 3000); do
+  if (( M < 1000 )); then mp=0$M; else mp=$M; fi
+  trk=$T/m$mp.feh077.$R.gz; iso=$T/iso_m$mp.feh077.$R.gz
+  [ -n "$(zcat $trk 2>/dev/null | head -c 1)" ] && continue
+  t0=$(date +%s)
+  ./run_tuc_dsep4_one_scratch.sh $R -0.77 $M > $D/logs_mcfix/mass/$R.$M.log 2>&1; c0=$?
+  used=standard; c1=-
+  if [ $c0 -eq 3 ] && at_tip $trk; then
+    used=standard_tip
+  elif [ $c0 -ne 0 ]; then
+    # move any partial track aside, otherwise the retry would skip as "done"
+    [ -f $trk ] && mv -f $trk $trk.try0 && { [ -f $iso ] && mv -f $iso $iso.try0; }
+    START=massdep ./run_tuc_dsep4_one_scratch.sh $R -0.77 $M > $D/logs_mcfix/mass/$R.$M.massdep.log 2>&1; c1=$?
+    used=massdep
+    if [ -f $trk.try0 ]; then
+      if [ "$(nlines $trk.try0)" -gt "$(nlines $trk)" ]; then
+        mv -f $trk.try0 $trk; [ -f $iso.try0 ] && mv -f $iso.try0 $iso; used=standard_partial
+      else
+        rm -f $trk.try0 $iso.try0
+      fi
+    fi
+  fi
+  echo "$M standard_rc=$c0 massdep_rc=$c1 kept=$used lines=$(nlines $trk)" >> $T/status.txt
+  echo "  mass $M standard_rc=$c0 massdep_rc=$c1 kept=$used $(( $(date +%s) - t0 ))s"
+done
+T=/dartfs-hpc/scratch/f007058/Tracks_tuc_dsep4_mcfix O=/dartfs-hpc/scratch/f007058/scmd_tb/tuc_iso_d4v2_mcfix /dartfs-hpc/scratch/f007058/scmd_tb/tuc_d4v2_build/build_tuc_d4_iso_v2.sh $R
+echo "run $R end $(date '+%F %T')"

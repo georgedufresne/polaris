@@ -1,0 +1,19 @@
+#!/bin/bash -l
+#SBATCH --job-name=emul4k
+#SBATCH --output=/dartfs-hpc/scratch/f007058/emul_iso/logs/4k_%A_%a.out
+#SBATCH --error=/dartfs-hpc/scratch/f007058/emul_iso/logs/4k_%A_%a.err
+#SBATCH --mem=12G
+#SBATCH --time=06:00:00
+#SBATCH --account=physics
+#SBATCH --cpus-per-task=4
+#SBATCH --nodes=1
+#SBATCH --array=0-99%100
+source /optnfs/common/miniconda3/etc/profile.d/conda.sh
+conda activate fidanka-env
+export PYTHONPATH=/dartfs-hpc/rc/home/8/f007058/CONF1DENCE OMP_NUM_THREADS=4
+START=$(( 20000 + SLURM_ARRAY_TASK_ID * 10 ))
+echo "task $SLURM_ARRAY_TASK_ID -> runs $START..$((START+9))  $(date '+%F %T')"
+python3 /dartfs-hpc/scratch/f007058/emul_iso/gen_emul_iso.py $(seq $START $((START+9))) \
+    --device cpu --n-mass 4000 --mass-low 0.25 --mass-high 1.60 \
+    --outdir /dartfs-hpc/scratch/f007058/Isochrones_emul4k
+echo "done $(date '+%F %T')"

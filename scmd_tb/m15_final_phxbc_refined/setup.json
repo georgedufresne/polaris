@@ -1,0 +1,199 @@
+{
+ "name": "M15",
+ "model": "ast",
+ "iso": "/dartfs-hpc/scratch/f007058/M15/iso_dsep4/{run}/isos/isochrones_example.txt",
+ "iso_format": "mist",
+ "obs": "/dartfs-hpc/scratch/f007058/Files_from_Martin/M15_data/M15_fitstars_2dKS.dat",
+ "obs_color": "vi",
+ "obs_mag": "v",
+ "completeness": "/dartfs-hpc/scratch/f007058/scmd_tb/tuc_grid_v3/code/data/ngc6791/completeness.csv",
+ "scatter_red": "/dartfs-hpc/scratch/f007058/scmd_tb/tuc_grid_v3/code/data/ngc6791/scatter_red.csv",
+ "scatter_blue": "/dartfs-hpc/scratch/f007058/scmd_tb/tuc_grid_v3/code/data/ngc6791/scatter_blue.csv",
+ "bc": "/dartfs-hpc/scratch/f007058/scmd_tb/m15_final_phxbc/inputs/bc_phoenix_acs_wfc_fehm225_ap4.npz",
+ "ages": [
+  8.0,
+  8.1,
+  8.2,
+  8.3,
+  8.4,
+  8.5,
+  8.6,
+  8.7,
+  8.8,
+  8.9,
+  9.0,
+  9.1,
+  9.2,
+  9.3,
+  9.4,
+  9.5,
+  9.6,
+  9.7,
+  9.8,
+  9.9,
+  10.0,
+  10.1,
+  10.2,
+  10.3,
+  10.4,
+  10.5,
+  10.6,
+  10.7,
+  10.8,
+  10.9,
+  11.0,
+  11.1,
+  11.2,
+  11.3,
+  11.4,
+  11.5,
+  11.6,
+  11.7,
+  11.8,
+  11.9,
+  12.0,
+  12.1,
+  12.2,
+  12.3,
+  12.4,
+  12.5,
+  12.6,
+  12.7,
+  12.8,
+  12.9,
+  13.0,
+  13.1,
+  13.2,
+  13.3,
+  13.4,
+  13.5,
+  13.6,
+  13.7,
+  13.8,
+  13.9,
+  14.0,
+  14.1,
+  14.2,
+  14.3,
+  14.4,
+  14.5,
+  14.6,
+  14.7,
+  14.8,
+  14.9,
+  15.0
+ ],
+ "dm_grid": [
+  15.3,
+  15.605,
+  0.01
+ ],
+ "ebv_grid": [
+  0.0,
+  0.1205,
+  0.001
+ ],
+ "exact_age": true,
+ "keep": 12,
+ "chunk": 9,
+ "kde_window": [
+  [
+   0.3,
+   1.3
+  ],
+  [
+   16.64,
+   20.64
+  ]
+ ],
+ "ks_window": [
+  [
+   0.3,
+   1.3
+  ],
+  [
+   16.64,
+   20.64
+  ]
+ ],
+ "ks_3sigma": 0.0105,
+ "ks_percentile": 95.0,
+ "imf_slope": -1.0,
+ "ast": "/dartfs-hpc/scratch/f007058/scmd_tb/m15_grid_d4/inputs/M15artstars.csv",
+ "fit_stars": "/dartfs-hpc/scratch/f007058/Files_from_Martin/M15_data/M15_fitstars.dat",
+ "fiducial": "/dartfs-hpc/scratch/f007058/Files_from_Martin/M15_data/fiducial_lines.csv",
+ "zp_v": 31.6176,
+ "zp_i": 30.8912,
+ "short_long_v": 17.5,
+ "short_long_i": 16.65,
+ "sgb_v": 18.64,
+ "window_dmag": 2.0,
+ "pad": 1.0,
+ "fid_width": 0.08,
+ "binary_fraction": 0.017,
+ "martin_sign": false,
+ "ast_errors": "nearest",
+ "ast_k": 30,
+ "ast_metric": "crowding",
+ "radial": "corrected",
+ "crn": true,
+ "crn_seed": 20261025,
+ "extra_sigma_v": 0.0,
+ "extra_sigma_i": 0.0,
+ "extra_sigma_table": [],
+ "zp_correct": true,
+ "zp_k": 50,
+ "zp_ref": [
+  19.3,
+  20.6
+ ],
+ "cut": "ridge",
+ "obs_raw": "/dartfs-hpc/scratch/f007058/Files_from_Martin/M15_data/M15.dat",
+ "ridge_width": 0.15,
+ "ridge_box_color": [
+  0.318,
+  0.918
+ ],
+ "ridge_margin": 0.3,
+ "ridge_exclude": [
+  [
+   [
+    0.368,
+    0.568
+   ],
+   [
+    17.12,
+    18.37
+   ]
+  ]
+ ],
+ "ridge_scales": null,
+ "ridge_warp": [
+  0.04,
+  [
+   [
+    0.055,
+    -0.05
+   ],
+   [
+    0.095,
+    -0.15
+   ],
+   [
+    0.135,
+    -0.3
+   ],
+   [
+    0.19,
+    -0.45
+   ]
+  ],
+  -0.5
+ ],
+ "ridge_warp_from_turnoff": true,
+ "ridge_smoothing": 5e-05,
+ "reddening": "evi",
+ "ast_split": false,
+ "radial_source": "raw",
+ "zp_mag_frac": 0.57
+}

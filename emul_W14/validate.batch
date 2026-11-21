@@ -1,0 +1,16 @@
+#!/bin/bash -l
+#SBATCH --job-name=W14_validate
+#SBATCH --output=/dartfs-hpc/scratch/f007058/emul_W14/logs/validate_%j.out
+#SBATCH --mem=12G
+#SBATCH --time=02:00:00
+#SBATCH --account=physics
+#SBATCH --cpus-per-task=4
+#SBATCH --nodes=1
+# gen_W14_iso.py --validate on run 20000 (identity with isochrone_W.w_isochrone; conductive-opacity sensitivity; timing),
+# then one full run (81 ages) for the per-run time.
+source /optnfs/common/miniconda3/etc/profile.d/conda.sh
+conda activate fidanka-env
+export OMP_NUM_THREADS=4
+python -c "import zuko, torch; print('zuko', zuko.__version__, 'torch', torch.__version__)"
+python /dartfs-hpc/scratch/f007058/emul_W14/gen_W14_iso.py --validate 20000
+python /dartfs-hpc/scratch/f007058/emul_W14/gen_W14_iso.py 20000 --outdir /dartfs-hpc/scratch/f007058/emul_W14/test_out

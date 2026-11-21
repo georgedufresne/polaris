@@ -1,0 +1,15 @@
+diff --git a/pyeep/tests/test_parallel.py b/pyeep/tests/test_parallel.py
+index 9fb54c4..438895f 100644
+--- a/pyeep/tests/test_parallel.py
++++ b/pyeep/tests/test_parallel.py
+@@ -59,8 +59,8 @@ def test_resolve_workers():
+     assert resolve_workers(-10 ** 6, 100) == 1
+     assert resolve_workers(5, 0) == 1
+ 
+-    # negative = all CPUs minus N
+-    assert resolve_workers(-1, 100) == max(1, ncpu - 1)
++    # negative = all CPUs minus N, still clamped by item count
++    assert resolve_workers(-1, 100) == max(1, min(ncpu - 1, 100))
+ 
+     # auto never exceeds CPU count or item count
+     auto = resolve_workers(0, 100, quiet=True)

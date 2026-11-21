@@ -1,0 +1,55 @@
+#!/bin/bash -l
+#SBATCH --job-name=tuc_d4mc
+#SBATCH --mem-per-cpu=1G
+#SBATCH --time=24:00:00
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --nodes=1
+#SBATCH --output=/dartfs-hpc/scratch/f007058/tuc_dsep4_batch/logs/%x_%A_%a.out
+#SBATCH --mail-user=george.e.dufresne.gr@dartmouth.edu
+#SBATCH --mail-type=FAIL
+# One 47 Tuc var set per task: DSEP4 with Monte Carlo mode ON for all 39 masses
+# (same grid as runtuc_noco.sh / the DSEP3 first 100), then its isochrones.
+# Submit with --account and --array; the array index IS the run number.
+#
+# Each mass runs with the standard pre-MS seed first. If dsep crashes (DSEP4 can
+# drive the surface luminosity of the starting model negative on its first
+# Henyey correction -> NaN -> segfault in eqrelv; seen at 0.20-0.32 Msun for
+# about half the 47 Tuc sets), it is rerun once from the mass-dependent seed
+# (START=massdep, e.g. log L 0.04 / log Teff 3.496 at 0.2 Msun instead of the
+# mixing-length-only 1.5-1.7 / 3.58-3.64). Validated on run 10000 at 0.2 Msun:
+# identical track to 5 decimals from 1-16 Gyr (max |dlog L| 1e-4 at 0.1 Gyr).
+# The longer of the two tracks is kept; every outcome goes to
+# Tracks_tuc_dsep4_mc/<run>/status.txt.
+R=$SLURM_ARRAY_TASK_ID
+B=/dartfs-hpc/scratch/f007058/tuc_dsep4_batch
+T=/dartfs-hpc/scratch/f007058/Tracks_tuc_dsep4_mc/$R
+export NML=/dartfs-hpc/rc/home/8/f007058/nml_dsep4_mc
+mkdir -p $T $B/logs/mass
+echo "run $R start $(date '+%F %T') on $(hostname)"
+cd /dartfs-hpc/rc/home/8/f007058/mcdsep/run
+nlines() { zcat "$1" 2>/dev/null | wc -l; }
+for M in $(seq 200 40 690) $(seq 700 50 1400) $(seq 1500 100 1900) $(seq 2000 200 3000); do
+  if (( M < 1000 )); then mp=0$M; else mp=$M; fi
+  trk=$T/m$mp.feh077.$R.gz; iso=$T/iso_m$mp.feh077.$R.gz
+  t0=$(date +%s)
+  ./runtuc_dsep4_mc_one.sh $R -0.77 $M > $B/logs/mass/$R.$M.log 2>&1; c0=$?
+  used=standard; c1=-
+  if [ $c0 -ne 0 ]; then
+    # move any partial track aside, otherwise the retry would skip as "done"
+    [ -f $trk ] && mv -f $trk $trk.try0 && { [ -f $iso ] && mv -f $iso $iso.try0; }
+    START=massdep ./runtuc_dsep4_mc_one.sh $R -0.77 $M > $B/logs/mass/$R.$M.massdep.log 2>&1; c1=$?
+    used=massdep
+    if [ -f $trk.try0 ]; then
+      if [ "$(nlines $trk.try0)" -gt "$(nlines $trk)" ]; then
+        mv -f $trk.try0 $trk; [ -f $iso.try0 ] && mv -f $iso.try0 $iso; used=standard_partial
+      else
+        rm -f $trk.try0 $iso.try0
+      fi
+    fi
+  fi
+  echo "$M standard_rc=$c0 massdep_rc=$c1 kept=$used lines=$(nlines $trk)" >> $T/status.txt
+  echo "  mass $M standard_rc=$c0 massdep_rc=$c1 kept=$used $(( $(date +%s) - t0 ))s"
+done
+$B/build_tuc_d4_iso.sh $R
+echo "run $R end $(date '+%F %T')"

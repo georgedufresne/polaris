@@ -1,0 +1,13 @@
+#!/bin/bash -l
+#SBATCH --job-name=trunc_tip
+#SBATCH --output=/dartfs-hpc/scratch/f007058/emul_iso/logs/tip_%A_%a.out
+#SBATCH --error=/dartfs-hpc/scratch/f007058/emul_iso/logs/tip_%A_%a.err
+#SBATCH --mem=8G
+#SBATCH --time=02:00:00
+#SBATCH --account=physics
+#SBATCH --cpus-per-task=1
+#SBATCH --array=0-49%50
+source /optnfs/common/miniconda3/etc/profile.d/conda.sh
+conda activate fidanka-env
+START=$(( 20000 + SLURM_ARRAY_TASK_ID * 20 ))
+python3 /dartfs-hpc/scratch/f007058/emul_iso/truncate_tip.py $(seq $START $((START+19)))

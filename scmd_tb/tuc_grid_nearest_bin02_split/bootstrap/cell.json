@@ -1,0 +1,8 @@
+{
+ "simulation_id": 10099,
+ "age_gyr": 11.4,
+ "distance_modulus": 13.38,
+ "extinction_ebv": 0.015,
+ "n": 10000,
+ "split_ast": true
+}

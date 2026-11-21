@@ -1,0 +1,20 @@
+#!/bin/bash -l
+#SBATCH --job-name=tuc_d4val2
+#SBATCH --mem-per-cpu=1G
+#SBATCH --time=06:00:00
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --account=physics
+#SBATCH --output=/dartfs-hpc/scratch/f007058/tuc_dsep4_batch/validate2/logs/%A_%a.out
+# Line N of tasks.txt: RUN MASS NMLSET TIMEOUT(s, 0 = run to completion)
+V=/dartfs-hpc/scratch/f007058/tuc_dsep4_batch/validate2
+read -r R M SET TO <<< "$(sed -n "${SLURM_ARRAY_TASK_ID}p" $V/tasks.txt)"
+case $SET in default) export NML=/dartfs-hpc/rc/home/8/f007058/nml_dsep4_mc ;;
+             fc03)    export NML=/dartfs-hpc/rc/home/8/f007058/nml_dsep4_mc_fc03 ;;
+             massdep) export NML=/dartfs-hpc/rc/home/8/f007058/nml_dsep4_mc START=massdep ;; esac
+export STOREBASE=$V/$SET
+cd /dartfs-hpc/rc/home/8/f007058/mcdsep/run
+t0=$(date +%s)
+if [ "$TO" -gt 0 ]; then timeout $TO ./runtuc_dsep4_mc_one.sh $R -0.77 $M; rc=$?
+else ./runtuc_dsep4_mc_one.sh $R -0.77 $M; rc=$?; fi
+echo "RESULT run=$R mass=$M set=$SET rc=$rc secs=$(( $(date +%s) - t0 ))"

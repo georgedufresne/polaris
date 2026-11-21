@@ -1,0 +1,21 @@
+#!/bin/bash -l
+#SBATCH --job-name=gen_W
+#SBATCH --output=/dartfs-hpc/scratch/f007058/emul_W/logs/%A_%a.out
+#SBATCH --error=/dartfs-hpc/scratch/f007058/emul_W/logs/%A_%a.err
+#SBATCH --mem=12G
+#SBATCH --time=08:00:00
+#SBATCH --account=physics
+#SBATCH --cpus-per-task=4
+#SBATCH --nodes=1
+#SBATCH --array=0-59%60
+source /optnfs/common/miniconda3/etc/profile.d/conda.sh
+conda activate fidanka-env
+export OMP_NUM_THREADS=4
+S=$(( 20000 + SLURM_ARRAY_TASK_ID * 17 ))
+E=$(( S + 16 )); [ $E -gt 20999 ] && E=20999
+[ $S -gt 20999 ] && exit 0
+echo "task $SLURM_ARRAY_TASK_ID -> runs $S..$E  $(date '+%F %T')"
+python3 /dartfs-hpc/scratch/f007058/emul_W/gen_W_iso.py $(seq $S $E) \
+    --eep-step 1 --mass-low 0.10 --mass-high 2.5 \
+    --outdir /dartfs-hpc/scratch/f007058/Isochrones_W
+echo "done $(date '+%F %T')"

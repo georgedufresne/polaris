@@ -1,0 +1,26 @@
+#!/bin/bash -l
+#SBATCH --job-name=emul_iso
+#SBATCH --output=/dartfs-hpc/scratch/f007058/emul_iso/logs/%A_%a.out
+#SBATCH --error=/dartfs-hpc/scratch/f007058/emul_iso/logs/%A_%a.err
+#SBATCH --mem=32G
+#SBATCH --time=06:00:00
+#SBATCH --partition=gpuq
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=4
+#SBATCH --nodes=1
+#SBATCH --array=0-9
+#SBATCH --mail-user=george.e.dufresne.gr@dartmouth.edu
+#SBATCH --mail-type=FAIL
+
+source /optnfs/common/miniconda3/etc/profile.d/conda.sh
+conda activate fidanka-env
+export PYTHONPATH=/dartfs-hpc/rc/home/8/f007058/CONF1DENCE
+
+W=/dartfs-hpc/scratch/f007058/emul_iso
+# 10 chunks of 100 runs: task k handles 20000+100k .. 20099+100k
+START=$(( 20000 + SLURM_ARRAY_TASK_ID * 100 ))
+RUNS=$(seq $START $(( START + 99 )))
+echo "task $SLURM_ARRAY_TASK_ID -> runs $START..$(( START + 99 ))  start $(date '+%F %T')"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
+python3 $W/gen_emul_iso.py $RUNS --n-mass 600
+echo "done $(date '+%F %T')"
