@@ -5,3 +5,5 @@ time	item	destination	source	check
 2026-11-21 14:59:53	ngc6791_dsep3_mc	/dartfs-hpc/rc/lab/C/ChaboyerB/george/iso/ngc6791_dsep3_mc	/dartfs-hpc/scratch/f007058/Tracks_noco/iso_mcfeh031.*.tar	999 of 999 tars, 0 unreadable, 3.6G
 2026-11-21 15:00:04	47tuc_dsep3_mc	/dartfs-hpc/rc/lab/C/ChaboyerB/george/iso/47tuc_dsep3_mc	/dartfs-hpc/scratch/f007058/Tracks_tuc_noco/iso_mcfeh077.*.tar	100 of 100 tars, 0 unreadable, 246M
 2026-11-21 15:02:04	47tuc_dsep3_mc	/dartfs-hpc/rc/lab/C/ChaboyerB/george/isochrones/47tuc_dsep3_mc.tar.xz	/dartfs-hpc/scratch/f007058/scmd_tb/tuc_iso/.../isochrones_example.txt	97 of 97 files, spot check tuc_iso/10000/isos/isochrones_example.txt identical, 234M
+2026-11-21 15:06:00	m15_dsep4_mc	/dartfs-hpc/rc/lab/C/ChaboyerB/george/iso/m15_dsep4_mc	/dartfs-hpc/scratch/f007058/M15/tracks_dsep4mc/<run>/iso_m*.gz	500 runs packed, 0 mismatched, 1.1G
+2026-11-21 15:17:08	m15_dsep4_mc	/dartfs-hpc/rc/lab/C/ChaboyerB/george/isochrones/m15_dsep4_mc.tar.xz	/dartfs-hpc/scratch/f007058/M15/iso_dsep4mc/.../isochrones_example.txt	500 of 500 files, spot check iso_dsep4mc/10000/isos/isochrones_example.txt identical, 1.5G
