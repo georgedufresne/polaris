@@ -1,0 +1,70 @@
+# Where the important content of each top-level scratch folder is kept. Read by purge_watch.sh.
+# status: KEPT (code in git and/or data archived in george/), REBUILD (deliberately not kept, rebuildable), NOT_KEPT (decide!)
+folder	status	note
+scmd_tb	KEPT	code in git; isochrone sets tuc_iso, tuc_iso_d4v2_mcfix archived; fit result tables NOT kept
+M15	KEPT	code + namelists in git; iso files + isochrones (dsep4mc) and var archived; old physics-off sets not kept
+tuc_dsep4_batch	KEPT	code in git
+Tracks_tuc_dsep4_mcfix	KEPT	iso files archived by after_tuc4.sh when the grid finishes; track files not kept
+Tracks_noco	KEPT	iso tars archived (george/iso/ngc6791_dsep3_mc); track tars not kept
+Tracks_tuc_noco	KEPT	iso tars archived (george/iso/47tuc_dsep3_mc)
+47Tuc_iso	KEPT	archived (george/isochrones/47tuc_dsep3_10k_dsepformat)
+47Tuc_var	KEPT	archived (george/var)
+Isochrones_noco	KEPT	symlinks; contents archived (george/isochrones/ngc6791_dsep3_mc)
+audit_ngc6791	KEPT	code in git; pyeep_work holds the NGC 6791 DSEP3 isochrones (archived via Isochrones_noco)
+emul_W14	KEPT	code + var in git/archive; CONF1DENCE-W snapshot is on GitHub
+emul_W	KEPT	code in git
+emul_iso	KEPT	code in git
+scmd_noco_pipeline	KEPT	code in git; logs not kept
+scmd_emul_pipeline	KEPT	code in git; logs not kept
+scmd_W14_pipeline	KEPT	code in git
+dsep4_batch	KEPT	code in git (NGC 6791 DSEP4 tests, Monte Carlo off)
+iso_plots	KEPT	code in git
+scmd_3way_compare.py	KEPT	in git
+isochrone-toolbox	KEPT	own GitHub repo; uncommitted patch saved in polaris/archive
+repository-instructions-main	KEPT	copy in ~/.claude/repository-instructions
+storage_survey	REBUILD	survey scripts
+sCMD_noco	REBUILD	sCMD shards
+sCMD_emul	REBUILD	sCMD shards
+sCMD_W	REBUILD	sCMD shards
+sCMD_W14	REBUILD	sCMD shards
+plots_for_2d_noco	REBUILD	per-cell KS plots
+plots_for_2d_emul	REBUILD	per-cell KS plots
+plots_for_2d_W	REBUILD	per-cell KS plots
+plots_for_2d_W14	REBUILD	per-cell KS plots
+Isochrones_emul	REBUILD	emulator isochrones
+Isochrones_emul4k	REBUILD	emulator isochrones
+Isochrones_emul4k_tip	REBUILD	emulator isochrones
+Isochrones_emul_medoid	REBUILD	emulator isochrones
+Isochrones_W	REBUILD	emulator isochrones (W v1.2)
+Isochrones_W14	REBUILD	emulator isochrones (W v1.4; polaris/emul_W14/gen_W14_iso.py)
+Tracks_dsep4	REBUILD	NGC 6791 DSEP4 tests, Monte Carlo off
+Tracks_dsep4_parts	REBUILD	NGC 6791 DSEP4 tests, Monte Carlo off
+Tracks_dsep4_parts_18Gyr	REBUILD	NGC 6791 DSEP4 tests, Monte Carlo off
+Tracks_dsep4_mc_18Gyr	REBUILD	NGC 6791 DSEP4 tests
+Tracks_tuc_dsep4_mc	REBUILD	47 Tuc DSEP4, Monte Carlo not read (superseded by _mcfix)
+Tracks_nmod60k	REBUILD	test tracks
+Tracks_test	REBUILD	test tracks
+nmod_test	REBUILD	test
+subset_isochrones_ngc6791	REBUILD	isochrone subset
+dsee_eep_plots	REBUILD	EEP plots
+dsee_stage2_work	REBUILD	EEP work files
+envs	REBUILD	Python env (fidanka-env); package list should be recorded
+mist_bc	REBUILD	public MIST bolometric-correction tables
+.cache	REBUILD	cache
+.config	REBUILD	config
+analysis_OG	NOT_KEPT	NGC 6791 OG fit tables (small)
+analysis_noco	NOT_KEPT	NGC 6791 DSEP3 fit tables (small)
+analysis_emul	NOT_KEPT	NGC 6791 emulator fit tables (small)
+analysis_W	NOT_KEPT	NGC 6791 W v1.2 fit tables (small)
+analysis_W14	NOT_KEPT	NGC 6791 W v1.4 fit tables (small; created when the W14 run ends)
+2d_ks_noco	NOT_KEPT	NGC 6791 per-run KS results (small)
+2d_ks_emul	NOT_KEPT	NGC 6791 per-run KS results (small)
+2d_ks_W	NOT_KEPT	NGC 6791 per-run KS results (small)
+2d_ks_W14	NOT_KEPT	NGC 6791 per-run KS results (small)
+Files_from_Martin	NOT_KEPT	Martin Ying's files (star files, inputs, his code); 0.8 GB
+EEP_options_reference.txt	NOT_KEPT	notes (text)
+scmd_3way_comparison.txt	NOT_KEPT	result summary (text)
+scmd_4way_comparison.txt	NOT_KEPT	result summary (text)
+scmd_og_vs_noco_comparison.txt	NOT_KEPT	result summary (text)
+scmd_og_vs_noco_uncertainties.txt	NOT_KEPT	result summary (text)
+scmd_why_no_change.txt	NOT_KEPT	notes (text)

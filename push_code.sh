@@ -1,9 +1,11 @@
 #!/bin/bash
-# Copy new or changed code from scratch into this repo, commit it and push it to GitHub.
+# Copy new or changed code from scratch into this repo, commit it and push it to GitHub; also copy the notes
+# (READMEs, .md, text summaries) to ~/notes/scratch.
 #   ./push_code.sh "what changed"      (message optional; default lists the top-level folders that changed)
 # Commits only if something changed. Never deletes files.
 set -euo pipefail
 cd "$(dirname "$0")"
+./sync_notes.sh || echo "WARNING: notes sync failed (see above); continuing with the code"
 ./sync_from_scratch.sh
 git add -A
 if git diff --cached --quiet; then echo "nothing new to commit"; exit 0; fi

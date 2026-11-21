@@ -54,8 +54,9 @@ pack_runs() {   # name src_dir tag
 pack_isochrones() {   # name parent set_dir [pattern]
   local name=$1 parent=$2 set=$3 pat=${4:-isochrones_example.txt} out=$G/isochrones/$1.tar.xz; free_ok
   local ns na
-  ns=$(cd $parent && find $set -name "$pat" -type f | wc -l)
-  (cd $parent && find $set -name "$pat" -type f -print0 | sort -z | tar --null -T - -cf -) | xz -T$T -6 > $out.tmp \
+  # -L / -h: follow symlinks and store the file contents (Isochrones_noco holds links into audit_ngc6791/pyeep_work)
+  ns=$(cd $parent && find -L $set -name "$pat" -type f | wc -l)
+  (cd $parent && find -L $set -name "$pat" -type f -print0 | sort -z | tar -h --null -T - -cf -) | xz -T$T -6 > $out.tmp \
     && mv $out.tmp $out
   na=$(xz -T$T -dc $out | tar -tf - | wc -l)
   # spot check: first file in the archive is byte-identical to the source
@@ -79,6 +80,7 @@ for it in $ITEMS; do
     var)      pack_var var_47tuc $S/47Tuc_var; pack_var var_m15 $S/M15/dsep4/var; pack_var var_ngc6791 $S/emul_W14/var
               cp -p $S/M15/M15_var.tar $G/var/ ;;
     ngc6791)  copy_tars ngc6791_dsep3_mc $S/Tracks_noco 'iso_mcfeh031.*.tar' ;;
+    ngc6791iso) pack_isochrones ngc6791_dsep3_mc $S Isochrones_noco ;;
     tuc3)     copy_tars 47tuc_dsep3_mc $S/Tracks_tuc_noco 'iso_mcfeh077.*.tar'
               pack_isochrones 47tuc_dsep3_mc $S/scmd_tb tuc_iso ;;
     m15)      pack_runs m15_dsep4_mc $S/M15/tracks_dsep4mc feh227
