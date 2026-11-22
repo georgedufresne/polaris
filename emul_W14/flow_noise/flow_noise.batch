@@ -1,0 +1,17 @@
+#!/bin/bash
+#SBATCH --job-name=flow_noise
+#SBATCH --account=physics
+#SBATCH --partition=standard
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=8G
+#SBATCH --time=06:00:00
+#SBATCH --output=/dartfs-hpc/scratch/f007058/emul_W14/flow_noise/logs/flow_noise_%A_%a.out
+# W v1.4 flow spread vs actual error (see flow_noise.py). Runs from runs.txt, split over the array.
+#   sbatch --array=0-5 flow_noise.batch          (6 tasks; task i takes every 6th run)
+F=/dartfs-hpc/scratch/f007058/emul_W14/flow_noise
+PY=${PY:-/dartfs-hpc/rc/home/8/f007058/.conda/envs/fidanka-env/bin/python}   # needs torch 2.8.0 + zuko 1.2.0; the scratch env has no torch
+NT=${SLURM_ARRAY_TASK_COUNT:-1}; I=${SLURM_ARRAY_TASK_ID:-0}
+RUNS=$(awk -v n=$NT -v i=$I '(NR-1) % n == i' $F/${RUNLIST:-runs.txt} | tr '\n' ' ')
+echo "task $I runs: $RUNS  $(date '+%F %T')"
+$PY $F/flow_noise.py $RUNS --k ${K:-100} --out ${OUT:-$F/output}
+echo "done $(date '+%F %T')"
