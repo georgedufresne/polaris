@@ -1,0 +1,32 @@
+#!/bin/bash -l
+#SBATCH --job-name=scmd_noco_re
+#SBATCH --output=/dartfs-hpc/scratch/f007058/scmd_noco_pipeline/logs/rerun_%A_%a.out
+#SBATCH --error=/dartfs-hpc/scratch/f007058/scmd_noco_pipeline/logs/rerun_%A_%a.err
+#SBATCH --mem=3G
+#SBATCH --time=48:00:00
+#SBATCH --account=physics
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --nodes=1
+# Rerun of 52 KTTAU 0/5 runs of array 9571522 (2026-11-22) that lost Kerberos access to the home conda env mid-job
+# (Oct 9-10): 19 have KS results with ages missing (no sCMDs written for those ages), 33 have no KS result (all stopped
+# 2026-10-10 00:43 before the 2D-KS step). Identical to run_scmd_noco.batch except Python comes from the scratch copy
+# of fidanka-env (same versions: Python 3.9.23, pandas 2.3.1, numpy 1.26.4, scipy 1.13.1) and the run list.
+# The partial KS tables of the 19 were moved to ../2d_ks_noco_partial/.
+# sbatch --array=0-51 --export=ALL,RUNLIST=runs_noco_rerun.txt run_scmd_noco_rerun.batch
+
+export PATH=/dartfs-hpc/scratch/f007058/envs/fidanka-env/bin:$PATH
+
+W=/dartfs-hpc/scratch/f007058/scmd_noco_pipeline
+cd $W
+
+ID=$(sed -n "$((SLURM_ARRAY_TASK_ID + 1))p" $W/${RUNLIST:?})
+echo "task $SLURM_ARRAY_TASK_ID -> run $ID   start $(date '+%F %T')   python $(command -v python)"
+
+for AGE in $(seq 4.0 0.1 12.0); do
+    python scmd_grid_red_dist_chaboyer_g_err_3err_test_noco.py $ID $AGE
+    python kde_code_for_grid_best_match_chaboyer_test_noco.py  $ID $AGE
+done
+
+python 2d_ks_comparison_grid_chaboyer_kde_noco.py $ID
+echo "done $(date '+%F %T')"

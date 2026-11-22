@@ -52,3 +52,17 @@ The same 290 runs (KTTAU 0: 145, 5: 145) are fitted in all three legs; each leg 
 
 `age_breakdown.py` (`age_breakdown.txt`, `.png`) gives the posterior shapes, per-set differences and fit quality,
 KTTAU 0/5 only.
+
+## Complete run and rerun of 6 incomplete runs (2026-11-22)
+
+- Array 11106027 finished 2026-11-21 22:29. 720 runs have KS results: 666 of the 668 KTTAU 0/5 runs, plus 54 KTTAU 1
+  runs that finished before KTTAU 1 was cancelled. `scmd_5way_comparison.txt` and `age_breakdown.txt` were updated.
+  The 290-run interim breakdown was kept as `age_breakdown_290runs.txt`.
+- 44 tasks lost Kerberos access to the home conda env mid-job ("python: Permission denied", "Auks API request failed").
+  That left 6 KTTAU 0/5 runs incomplete: 20271 and 20349 have no KS table; 20261 (73 ages), 20263 (73, missing
+  8.1-8.8 Gyr), 20288 (80) and 20374 (80) are missing ages.
+- They are being rerun with `run_scmd_W14_rerun.batch` (array 11131934; `runs_W14_rerun.txt`). It is identical except
+  that Python comes from the scratch copy of fidanka-env, which has the same versions.
+- The 4 partial KS tables were moved, not deleted, to `/dartfs-hpc/scratch/f007058/2d_ks_W14_partial/`.
+- The DSEP3 leg had the same problem and is being rerun too (52 runs; see `../scmd_noco_pipeline/README.txt`).
+- After both reruns, redo merge, prefilter and analyze for both legs, then `scmd_5way_compare.py` and `age_breakdown.py`.

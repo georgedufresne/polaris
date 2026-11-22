@@ -1,0 +1,36 @@
+#!/bin/bash -l
+#SBATCH --job-name=scmdW14re
+#SBATCH --output=/dartfs-hpc/scratch/f007058/scmd_W14_pipeline/logs/scmd_rerun_%A_%a.out
+#SBATCH --error=/dartfs-hpc/scratch/f007058/scmd_W14_pipeline/logs/scmd_rerun_%A_%a.err
+#SBATCH --mem=4G
+#SBATCH --time=48:00:00
+#SBATCH --account=physics
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --nodes=1
+# Rerun of the 6 incomplete KTTAU 0/5 runs of array 11106027 (2026-11-22): 20271 and 20349 have no KS result, 20261,
+# 20263, 20288 and 20374 are missing ages. Their tasks lost Kerberos access to the home conda env / home OUTPUT_KDE
+# mid-job. Identical to run_scmd_W14.batch except Python comes from the scratch copy of fidanka-env (same versions:
+# Python 3.9.23, pandas 2.3.1, numpy 1.26.4, scipy 1.13.1). The partial KS tables were moved to ../2d_ks_W14_partial/.
+# sbatch --array=0-5 --export=ALL,RUNLIST=runs_W14_rerun.txt run_scmd_W14_rerun.batch
+
+export PATH=/dartfs-hpc/scratch/f007058/envs/fidanka-env/bin:$PATH
+
+W=/dartfs-hpc/scratch/f007058/scmd_W14_pipeline
+cd $W
+
+ID=$(sed -n "$((SLURM_ARRAY_TASK_ID + 1))p" $W/${RUNLIST:?})
+echo "task $SLURM_ARRAY_TASK_ID -> run $ID   start $(date '+%F %T')   python $(command -v python)"
+
+# skip if this run already has its KS result (makes requeue cheap)
+if [ -s /dartfs-hpc/scratch/f007058/2d_ks_W14/2d_ks_results_$ID.csv ]; then
+    echo "run $ID already done"; exit 0
+fi
+
+for AGE in $(seq 4.0 0.1 12.0); do
+    python scmd_grid_red_dist_chaboyer_g_err_3err_test_emul.py $ID $AGE
+    python kde_code_for_grid_best_match_chaboyer_test_emul.py  $ID $AGE
+done
+
+python 2d_ks_comparison_grid_chaboyer_kde_emul.py $ID
+echo "done $(date '+%F %T')"
