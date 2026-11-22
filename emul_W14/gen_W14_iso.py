@@ -15,7 +15,11 @@ the var-file -> label mapping (21 values, C12+He4 = 1.0), Z from gs98getz, the M
 Conductive opacity: W v1.4 stores it as a perturbation in [-1, 1] (default 0, the DSEP4 Blouin20 convention), while
 these varfeh files hold a Hubbard-style multiplier (cocoef ~1 +/- 0.2). `--cond var` (default) passes the var-file value
 as the October run did; `--cond zero` uses 0.0 (the mean Blouin opacity).
-Inputs are copies on scratch: the repo snapshot, var/ and gs98getz in this folder."""
+Inputs are copies on scratch: the repo snapshot, var/ and gs98getz in this folder.
+--z-factor F (default 1, i.e. off): W's training grid computed Z with Martin's gs98getz, exactly 1.121 x ours, so W's
+[Fe/H] label means Z = 1.121 x getz([Fe/H]). With F = 1.121 the flow and the age head are given
+[Fe/H]_W = getz^-1(getz([Fe/H]) / F) at the run's [a/Fe], so W models the same Z as our DSEP3/OG runs of that var file
+(emul_W14/feh_convention). The output header keeps the var file's [Fe/H] and Z = getz([Fe/H])."""
 import argparse
 import os
 import subprocess
@@ -84,6 +88,18 @@ def phys_for(run, vardir, lh, default, cond):
     if cond == "zero":
         p[lh.index("Conductive Opacity")] = 0.0
     return p
+
+
+def getz(feh, afe):
+    return float(subprocess.run([f'{S}/gs98getz', f'{feh:.6f}', f'{afe:.6f}'], capture_output=True, text=True).stdout)
+
+
+def feh_for_z(z, afe, lo=-2.0, hi=1.5):
+    """Inverse of getz in [Fe/H] at fixed [a/Fe] (bisection, 50 halvings)."""
+    for _ in range(50):
+        mid = 0.5 * (lo + hi)
+        lo, hi = (mid, hi) if getz(mid, afe) < z else (lo, mid)
+    return 0.5 * (lo + hi)
 
 
 def write_mist(blocks, path, feh, y, z, afe):
@@ -165,6 +181,7 @@ def main():
     ap.add_argument('--cond', choices=["var", "zero"], default="var")
     ap.add_argument('--device', default='cpu')
     ap.add_argument('--validate', type=int, default=None, help="run number: compare with isochrone_W.w_isochrone")
+    ap.add_argument('--z-factor', type=float, default=1.0, help="W [Fe/H] for Z = getz/F (1.121: our Z convention)")
     a = ap.parse_args()
 
     W = WEmulator(device=a.device)
@@ -176,7 +193,7 @@ def main():
 
     ages = np.round(np.arange(4.0, 12.0001, 0.1), 4)
     print(f"W v1.4 recipe (hoisted table) on {a.device}: {len(ages)} ages, EEP grid {len(eep_grid(ah))}, "
-          f"nmass={a.nmass}, cond={a.cond}", flush=True)
+          f"nmass={a.nmass}, cond={a.cond}, z-factor={a.z_factor}", flush=True)
     for run in a.runs:
         vf = f'{a.vardir}/varfeh+031.{run}'
         if not os.path.exists(vf):
@@ -191,6 +208,11 @@ def main():
         p22 = np.asarray(phys[:22], float)[:len(ah.theta)]
         feh, yy, afe = phys[0], phys[1], phys[2]
         z = float(subprocess.run([f'{S}/gs98getz', str(feh), str(afe)], capture_output=True, text=True).stdout.strip() or 0)
+        if a.z_factor != 1.0:
+            fw = feh_for_z(getz(feh, afe) / a.z_factor, afe)
+            phys[lh.index("FeH")] = fw
+            p22 = np.asarray(phys[:22], float)[:len(ah.theta)]
+            print(f"  {run}: [Fe/H] {feh:+.6f} -> W [Fe/H] {fw:+.6f} (Z {z:.6e}; W grid Z {getz(fw, afe) * a.z_factor:.6e})", flush=True)
         eg, mg, LA = age_table(ah, p22, a.mass_low, a.mass_high, a.nmass)
         blocks = []
         for age in ages:

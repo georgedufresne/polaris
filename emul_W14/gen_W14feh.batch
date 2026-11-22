@@ -1,0 +1,20 @@
+#!/bin/bash -l
+#SBATCH --job-name=genW14feh
+#SBATCH --account=physics
+#SBATCH --partition=standard
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=8G
+#SBATCH --time=06:00:00
+#SBATCH --output=/dartfs-hpc/scratch/f007058/emul_W14/logs/genW14feh_%A_%a.out
+# W v1.4 NGC 6791 isochrones with [Fe/H] converted to our Z convention (gen_W14_iso.py --z-factor 1.121), for the
+# KTTAU 0/5 runs in ${RUNLIST:-runs_W14feh.txt} -> /dartfs-hpc/scratch/f007058/Isochrones_W14feh (2026-11-22).
+# Task k of NT takes list lines k+1, k+1+NT, ... Python: the home conda env (torch 2.8.0, zuko 1.2.0; the scratch copy has
+# no torch), as for Isochrones_W14.
+#   sbatch --array=0-39 --export=ALL,NT=40 gen_W14feh.batch
+E=/dartfs-hpc/scratch/f007058/emul_W14
+PY=/dartfs-hpc/rc/home/8/f007058/.conda/envs/fidanka-env/bin/python
+export OMP_NUM_THREADS=4
+RUNS=$(awk -v n=${NT:?} -v i=$SLURM_ARRAY_TASK_ID '(NR-1) % n == i' $E/${RUNLIST:-runs_W14feh.txt} | tr '\n' ' ')
+echo "task $SLURM_ARRAY_TASK_ID -> $(echo $RUNS | wc -w) runs  $(date '+%F %T')"
+$PY $E/gen_W14_iso.py $RUNS --z-factor 1.121 --outdir ${OUTDIR:-/dartfs-hpc/scratch/f007058/Isochrones_W14feh}
+echo "done $(date '+%F %T')"

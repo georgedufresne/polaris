@@ -1,0 +1,16 @@
+#!/bin/bash -l
+#SBATCH --job-name=W14feh_smoke
+#SBATCH --account=physics
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=4G
+#SBATCH --time=01:00:00
+#SBATCH --output=/dartfs-hpc/scratch/f007058/scmd_W14feh_pipeline/logs/smoke_%j.out
+# one age (8.3 Gyr) of run 20041 through the W14feh sCMD + KDE stages, same environment as run_scmd_W14feh.batch
+export PATH=/dartfs-hpc/scratch/f007058/envs/fidanka-env/bin:$PATH
+export HOME=/dartfs-hpc/scratch/f007058 MPLCONFIGDIR=/dartfs-hpc/scratch/f007058/.config/matplotlib OMP_NUM_THREADS=1
+cd /dartfs-hpc/scratch/f007058/scmd_W14feh_pipeline
+python scmd_grid_red_dist_chaboyer_g_err_3err_test_emul.py 20041 8.3 2>&1 | grep -aE 'Isochrone|Loaded|DONE|rror|Saved .*EBV0.200' | head -20
+python kde_code_for_grid_best_match_chaboyer_test_emul.py 20041 8.3 2>&1 | grep -aE 'Loading|Results saved|rror|Deleted|kept' | head -20
+echo "sCMD files at 8.3: $(ls /dartfs-hpc/scratch/f007058/sCMD_W14feh/20041 | grep -c 'age8.3Gyr')"
+ls /dartfs-hpc/scratch/f007058/OUTPUT_KDE_W14feh | head -3
+echo "done $(date '+%F %T')"

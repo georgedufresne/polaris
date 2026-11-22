@@ -1,0 +1,37 @@
+#!/bin/bash -l
+#SBATCH --job-name=scmdW14feh
+#SBATCH --output=/dartfs-hpc/scratch/f007058/scmd_W14feh_pipeline/logs/scmd_%A_%a.out
+#SBATCH --error=/dartfs-hpc/scratch/f007058/scmd_W14feh_pipeline/logs/scmd_%A_%a.err
+#SBATCH --mem=4G
+#SBATCH --time=48:00:00
+#SBATCH --account=physics
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --nodes=1
+# NGC 6791 sCMD leg with W v1.4 isochrones whose [Fe/H] was converted to our Z convention (Isochrones_W14feh), 2026-11-22.
+# Same three stages and settings as ../scmd_W14_pipeline/run_scmd_W14.batch. The copies of the scripts in this folder differ
+# only in paths: Isochrones_W14feh, sCMD_W14feh, 2d_ks_W14feh, plots_for_2d_W14feh, OUTPUT_KDE_W14feh, and the home inputs
+# (observed CMD, completeness, red/blue scatter, the bolometric-correction table) read from md5-checked copies in inputs/.
+# Python from the scratch env, HOME on scratch: nothing here touches the Kerberos home mount.
+#   sbatch --array=0-(N-1)%T --export=ALL,RUNLIST=runs.txt run_scmd_W14feh.batch
+export PATH=/dartfs-hpc/scratch/f007058/envs/fidanka-env/bin:$PATH
+export HOME=/dartfs-hpc/scratch/f007058 MPLCONFIGDIR=/dartfs-hpc/scratch/f007058/.config/matplotlib OMP_NUM_THREADS=1
+
+W=/dartfs-hpc/scratch/f007058/scmd_W14feh_pipeline
+cd $W
+
+ID=$(sed -n "$((SLURM_ARRAY_TASK_ID + 1))p" $W/${RUNLIST:?})
+echo "task $SLURM_ARRAY_TASK_ID -> run $ID   start $(date '+%F %T')   python $(command -v python)"
+
+# skip if this run already has its KS result (makes requeue cheap)
+if [ -s /dartfs-hpc/scratch/f007058/2d_ks_W14feh/2d_ks_results_$ID.csv ]; then
+    echo "run $ID already done"; exit 0
+fi
+
+for AGE in $(seq 4.0 0.1 12.0); do
+    python scmd_grid_red_dist_chaboyer_g_err_3err_test_emul.py $ID $AGE
+    python kde_code_for_grid_best_match_chaboyer_test_emul.py  $ID $AGE
+done
+
+python 2d_ks_comparison_grid_chaboyer_kde_emul.py $ID
+echo "done $(date '+%F %T')"
