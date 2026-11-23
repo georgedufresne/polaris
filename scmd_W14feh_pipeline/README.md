@@ -88,3 +88,25 @@ Then `../scmd_tb/tuc_final_mc/run.sh` starts the 47 Tuc refit.
 - The Z-matched W gives relatively more posterior weight (more and better-KS rows) to the sets that DSEP3 puts young
   (corr -0.25). That is why the pooled gap shrinks by only 0.05 Gyr.
 - Fit quality is equal: median lowest KS 0.0306 (W14feh) vs 0.0303 (New).
+
+**All parameters, mean vs median, and what is left of the gap** (`param_gap_breakdown.py` -> `param_gap_breakdown.txt`,
+2026-11-23):
+
+- **Age posteriors, own sets (mean / median, Gyr):** OG 8.496 / 8.466, New 8.534 / 8.498, W14 8.363 / 8.319, W14feh
+  8.390 / 8.339. Medians sit 0.03-0.05 below the means.
+- **W14feh - New, age differences (Gyr):**
+
+  | measure | mean | median |
+  |---|---|---|
+  | posterior | -0.139 +/- 0.017 | -0.155 +/- 0.023 |
+  | per set | -0.064 +/- 0.016 | -0.049 +/- 0.016 |
+
+- **Other parameters, W14feh - New:** DM +0.009, E(B-V) -0.002, [Fe/H] +0.008, Y -0.0004, [alpha/Fe] +0.008, mixing
+  length -0.014. Each is at most 0.2 of the posterior sd.
+- **Within-set age shift (-0.078 +/- 0.013).** In each set, W lands slightly farther (+0.008 mag) and redder (+0.0025).
+  The per-set age shift at equal DM and E(B-V) is +0.03 Gyr, so the age goes with the distance/reddening degeneracy.
+  `../emul_W14/feh_convention` (W fitted to DSEP3's own isochrones, distance + reddening free) gives the same -0.05 to
+  -0.10 Gyr. It is an emulator-accuracy effect, not a pipeline one.
+- **Reweighting (-0.061 +/- 0.013).** All of it goes through the var-file inputs (residual +0.004). W14feh favours sets
+  with slightly higher [Fe/H] (-0.020 Gyr), lower mixing length (-0.020), higher [alpha/Fe] (-0.015) and alexcoef
+  (-0.009), which DSEP3 ages young. This term was +0.051 before the Z fix.
