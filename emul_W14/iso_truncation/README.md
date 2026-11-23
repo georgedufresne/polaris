@@ -17,3 +17,17 @@ neighbouring ages.
 `age:count/neighbour_mean`. The per-task files are `output/<label>_<task>.tsv`.
 
 **Jobs.** See `jobids.txt`.
+
+## Result (2026-11-22)
+
+- **W14 (`Isochrones_W14`):** 3 of 1000 runs have truncated ages.
+  - 20005: 7.6 and 7.7 Gyr (726 and 680 points);
+  - 20374: 7.2 Gyr (926 points);
+  - 20710: 4.8 and 5.2 Gyr (920 and 779 points).
+- **W14feh (`Isochrones_W14feh`):** 0 of 668.
+
+The truncated ages fail the KDE step and simply drop out of the 2D-KS table. 20005 has 79 ages, without 7.6 and 7.7.
+So truncation does not bias a fit silently. The fits checked are all well away from those ages.
+
+Only 20374 is in the KTTAU 0/5 comparison list. 20005 and 20710 are not. `run_W14feh.sh` sets 20374 aside from the
+W14 leg as incomplete (80 of 81 ages), so the comparison uses 667 runs for that leg.
