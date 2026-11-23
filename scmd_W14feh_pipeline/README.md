@@ -51,3 +51,40 @@ Kerberos home mount. Generation is the exception: it needs torch, so it uses the
 6. `scmd_6way_compare.py` (-> `../scmd_6way_comparison.txt`), `age_breakdown_W14feh.py` and the W14 `age_breakdown.py`.
 
 Then `../scmd_tb/tuc_final_mc/run.sh` starts the 47 Tuc refit.
+
+## Result (driver "all done" 2026-11-23 10:13)
+
+**Completeness.** W14feh 668/668, New 0 incomplete. The W14 leg is 667: run 20374 has 80 ages, because its
+`Isochrones_W14` 7.2 Gyr curve is truncated (`../emul_W14/iso_truncation`). It was retried once and kept out.
+
+**Posterior ages (KTTAU 0/5, each leg's own sets)** (`../scmd_6way_comparison.txt`):
+
+| leg | age (Gyr) |
+|---|---|
+| OG | 8.496 +/- 0.620 |
+| New | 8.534 +/- 0.647 |
+| W14 | 8.363 +/- 0.647 |
+| W14feh | 8.390 +/- 0.668 |
+
+**Paired difference on common sets (bootstrap SE):**
+
+| pair | difference (Gyr) | n |
+|---|---|---|
+| W14feh - New | -0.139 +/- 0.017 | 374 |
+| W14 - New | -0.188 +/- 0.019 | 354 |
+| W14feh - OG | -0.075 +/- 0.028 | |
+| W14feh - W14 | +0.049 +/- 0.022 | |
+| New - OG | +0.051 +/- 0.027 | |
+
+**Decomposition of the pooled gap** (`age_gap_decomposition.py` -> `age_gap_decomposition.txt`):
+
+| | pooled | within-set shift | set reweighting |
+|---|---|---|---|
+| W14 - New | -0.188 | -0.239 | +0.051 |
+| W14feh - New | -0.139 | -0.078 | -0.061 |
+
+- The Z fix removes about two-thirds of the per-set age offset. The per-set median moved from -0.24 to -0.05 Gyr
+  (`age_breakdown.txt`), and the He correlation of the per-set gap dropped from rho +0.29 to +0.15.
+- The Z-matched W gives relatively more posterior weight (more and better-KS rows) to the sets that DSEP3 puts young
+  (corr -0.25). That is why the pooled gap shrinks by only 0.05 Gyr.
+- Fit quality is equal: median lowest KS 0.0306 (W14feh) vs 0.0303 (New).
