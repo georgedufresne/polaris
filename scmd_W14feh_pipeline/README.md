@@ -110,3 +110,19 @@ Then `../scmd_tb/tuc_final_mc/run.sh` starts the 47 Tuc refit.
 - **Reweighting (-0.061 +/- 0.013).** All of it goes through the var-file inputs (residual +0.004). W14feh favours sets
   with slightly higher [Fe/H] (-0.020 Gyr), lower mixing length (-0.020), higher [alpha/Fe] (-0.015) and alexcoef
   (-0.009), which DSEP3 ages young. This term was +0.051 before the Z fix.
+
+**Age noise budget** (`age_noise_budget.py` -> `age_noise_budget.txt`, 2026-11-23):
+
+- **DSEP3 physics on, posterior sd 0.647 Gyr:**
+  - within-set (age traded against DM/E(B-V) inside the KS acceptance) 0.41;
+  - between sets 0.50, of which the var-file inputs explain 0.46 (R^2 0.82) and the residual is 0.22.
+- **sCMD Monte Carlo noise.** The same isochrones were rerun with new synthetic stars on 6 runs (the 2026-11-22 rerun
+  first attempts vs reruns). The noise is about 0.05-0.07 Gyr per set (68 % range 0.03-0.08; small sample). Over
+  about 400 sets it averages to about 0.004 Gyr in the posterior mean.
+- **Emulator.** The per-set W14feh - New spread is 0.32 Gyr sd (0.21 robust). After removing the sCMD noise, the
+  isochrone (emulator) part is 0.20-0.31 Gyr per set. That matches the isochrone-level 0.16-0.18 Gyr
+  (`../emul_W14/feh_convention`). It widens the W posterior from 0.647 to 0.668 Gyr.
+- **W training domain.** The W [Fe/H] labels run from -4.0 to +0.5; only 5 % of training points are at [Fe/H] >= +0.3,
+  so NGC 6791 sits at the sparse metal-rich edge. Only 1 fitted common set lies past +0.5 (W label). The per-set error
+  is similar across [Fe/H] bins: median -0.02 to -0.07 Gyr from +0.1 to +0.4, and -0.17 Gyr at +0.4 to +0.5 (27 sets).
+  Extrapolation is not the main cause.
