@@ -102,3 +102,59 @@ parameter.
   0.000-0.050 in 0.001), writes a new `../tuc_final_mc_refined/`, and appends the coarse-E ages to
   `compare_production.txt`. It now stops if the override is missing.
 - **M15 is not affected.** `../m15_final_mc/refine/setup_override.json` is production's, with 121 E values.
+
+## Corrected results (rerun "all done" 2026-11-24 16:36; supersede "Results" and "Comparison with Ying" above)
+
+**Check.** The refined rows now hold 51 E values, the same as production (the first pass had 11). The refinement
+finished all 6,972 units with no errors; 41,607 of 60,756 (run, age) cells improved.
+
+**Bootstrap.** 10,000 fresh references at the new best cell: run 10567, 10.3 Gyr, mu 13.49, E 0.039. The null is
+0.00538 +/- 0.00174, so the 3σ line is 0.01059. Production's was 0.01058.
+
+**Best fits** (`rerun_refine.log`):
+1. run 10567: 10.3 Gyr, mu 13.49, E 0.039, KS 0.00891 (2.0σ), [Fe/H] -0.724.
+2. run 10105: 12.3 Gyr, mu 13.35, E 0.010, KS 0.00915, [Fe/H] -0.796. This is the best fit inside D17.
+3. run 10091: 10.8 Gyr, mu 13.48, E 0.041, KS 0.00933, [Fe/H] -0.811.
+
+Production's best was 0.00892.
+
+**Age posteriors (Gyr; `compare_production.txt`):**
+
+| | production (Monte Carlo off) | this (Monte Carlo on) | coarse-E first pass |
+|---|---|---|---|
+| strict | 10.97 +/- 0.55 (median 10.86, 93 runs) | 11.20 +/- 0.84 (11.04, 30) | 11.16 (22) |
+| strict_D17 | 11.40 +/- 0.37 (11.37, 72) | **11.72 +/- 0.66 (11.58, 17)** | 11.75 (13) |
+| shifted | 11.20 +/- 0.76 (11.11, 320) | 11.15 +/- 0.86 (11.02, 291) | 11.15 (272) |
+| shifted_D17 | 11.65 +/- 0.58 (11.55, 248) | 11.72 +/- 0.68 (11.59, 214) | 11.72 (190) |
+| scaled | 11.28 +/- 0.88 (11.17, 454) | 11.21 +/- 0.95 (11.07, 518) | 11.23 (520) |
+| scaled_D17 | 11.78 +/- 0.70 (11.65, 334) | 11.83 +/- 0.76 (11.71, 396) | 11.81 (382) |
+
+**Effect of the fix.** The finer E grid changed the ages by at most 0.04 Gyr. The coarse-pass conclusions stand.
+
+**Strict still keeps far fewer runs than production: 30 against 93.** The cut is the same, so the coarse E grid was
+not the main reason, despite what the Correction section guessed. The cause is the spread of per-run best KS:
+
+| | 5th percentile | 25th percentile | median | runs <= 3σ | runs <= 0.0115 |
+|---|---|---|---|---|---|
+| production | 0.00983 | 0.01244 | 0.01821 | 93 | 174 |
+| Monte Carlo on | 0.01094 | 0.01363 | 0.01703 | 30 | 90 |
+
+With the varied physics, fewer runs reach the very low KS values, but the typical run fits better.
+
+**Other parameters, strict_D17** (production -> this):
+- [Fe/H] -0.731 -> -0.752;
+- mu 13.416 -> 13.390;
+- E 0.028 -> 0.020;
+- Y 0.258 -> 0.258;
+- mixing length 1.84 -> 1.75;
+- [alpha/Fe] 0.40 in both.
+
+The top 5 runs carry 62 % of the strict_D17 weight.
+
+**Ying et al. 2025, 2D KS:** 11.76 +/- 0.76 Gyr, [Fe/H] -0.77, mu 13.40, E 0.02, with the D17 box as his prior.
+- Ours, strict_D17: 11.72 +/- 0.66, which is -0.04 Gyr.
+- shifted_D17 is -0.04 and scaled_D17 is +0.07.
+- [Fe/H], mu and E agree to within 0.02, 0.01 and 0.00.
+- Production (Monte Carlo off) was 0.36 below him.
+
+The setup differences listed in the comparison above remain.
