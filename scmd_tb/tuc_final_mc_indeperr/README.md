@@ -38,3 +38,17 @@ predicted a main sequence 1.7-1.9x wider than observed (`../m15_ast_error_correl
    independent.
 
 Expected: the refinement rerun ~16:00 on 2026-11-24, this grid ~18 h after, results ~midday 2026-11-25.
+
+## 500 runs (the user, 2026-11-24 15:15)
+
+The user asked for 500 runs of 47 Tuc, done the advisor's way. `runs.txt` is now the first 500 of the 996
+(10000-10500); the full list is kept as `runs_996.txt`. The swap was made before `run.sh` reached the grid, so the
+driver itself was not edited.
+- The grid is about 3,500 units, about 7.5 h after the refinement rerun ends.
+
+`joint500.sh` (log `joint500.log`) does the paired comparison on the same 500 runs:
+- After `../tuc_final_mc/rerun_refine.sh`, it takes the joint-error rows of these 500 runs from the corrected
+  `../tuc_final_mc_refined/`, checks they have the 0.001 E steps, and runs the statistics in `joint500/` with the joint
+  fit's own bootstrap null.
+- After `run.sh`, it writes `compare_500.txt`: production (996, Monte Carlo off), joint 996, joint 500 and
+  independent 500.
