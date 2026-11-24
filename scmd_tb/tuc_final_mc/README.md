@@ -86,3 +86,19 @@ parameter.
 - Grid size: ours 1000 runs, his 10,000.
 - Error model: ours takes correlated AST errors from one artificial star.
 - Weights: his include calibration stars.
+
+## Correction (2026-11-24 13:30): the refinement above ran on the coarse E grid
+
+`refine/setup_override.json` was not copied from `../tuc_final`. Its absence was logged as a FileNotFoundError in
+`run.log` (line 19), but the driver carried on.
+- **What it meant:** the KS descent ran on the grid's 0.005 E steps (11 E values in the refined rows), while
+  production's refinement used 0.001 (51 values).
+- **Consequence:** the "Results" and "Comparison with Ying" sections above are a coarse-E first pass and are
+  superseded. It is not a one-change comparison with production. The coarse descent can miss KS minima, which
+  probably explains why strict kept only 22 runs, against 93.
+- **Kept, not deleted:** `refine_coarseE/`, `combined_2d_ks_results_refined_coarseE.csv`,
+  `compare_production_coarseE.txt` and `../tuc_final_mc_refined_coarseE/`.
+- **Rerun:** `rerun_refine.sh` (log `rerun_refine.log`) does steps 2-4 again with production's override (E
+  0.000-0.050 in 0.001), writes a new `../tuc_final_mc_refined/`, and appends the coarse-E ages to
+  `compare_production.txt`. It now stops if the override is missing.
+- **M15 is not affected.** `../m15_final_mc/refine/setup_override.json` is production's, with 121 E values.
