@@ -64,3 +64,25 @@ line is 0.0106.
   essentially unchanged: within 0.07 Gyr for shifted and scaled, which keep 190-520 runs.
 - Strict moves 0.2-0.35 Gyr older (median +0.15-0.19), but rests on 13-22 runs. Its width grows from 0.37 to 0.63 Gyr.
 - The varied physics broadens every posterior.
+
+## Comparison with Ying et al. 2025 (ApJ, arXiv:2505.02969, Table 7), 2026-11-24
+
+**Ying et al. 2025, 47 Tuc:**
+- 2D KS: 11.76 +/- 0.76 Gyr, [Fe/H] -0.77 +/- 0.03, mu 13.40 +/- 0.05, E 0.02 +/- 0.01.
+- Voronoi binning (his adopted method): 11.89 +/- 0.84 Gyr.
+- DEBs: 11.36 +/- 0.81 Gyr.
+
+His 47 Tuc priors (Table 4: mu 13.15-13.45, E(V-I) 0-0.05) are the D17 box.
+
+**Ours, strict_D17:** 11.75 +/- 0.63 Gyr, [Fe/H] -0.749, mu 13.387, E 0.020. That is -0.01 Gyr against his 2D KS.
+shifted_D17 and scaled_D17 give 11.72 and 11.81.
+
+Production (Monte Carlo off) was 11.40, 0.36 below him. With the Monte Carlo inputs read, the two agree in every
+parameter.
+
+**Setup differences that remain:**
+- PDMF: ours -0.45, his -0.84.
+- [alpha/Fe]: ours fits 0.40 (the grid has 0.2 and 0.4); his fiducial fit gives 0.20-0.24.
+- Grid size: ours 1000 runs, his 10,000.
+- Error model: ours takes correlated AST errors from one artificial star.
+- Weights: his include calibration stars.

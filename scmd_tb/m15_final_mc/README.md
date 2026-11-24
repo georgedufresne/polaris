@@ -69,3 +69,21 @@ That leaves 40 physics CPUs for the NGC 6791 W v1.4 run within the 240 + 32 limi
   - The uncertainty roughly doubles, because the physics now varies between runs.
   - The fit improves at 12-13.6 Gyr, and the best fit moves to 13.2 Gyr at 2.2 sigma.
   - Ying et al.'s 13.39 +/- 0.39 is now about 0.6 sigma from the strict posterior (combined errors).
+
+## Comparison with Ying et al. 2025 (ApJ, arXiv:2505.02969, Table 7), 2026-11-24
+
+**Ying et al. 2025, M15:**
+- 2D KS: 13.39 +/- 0.39 Gyr, [Fe/H] -2.30, mu 15.49, E 0.08.
+- Voronoi binning (his adopted M15 method): 13.23 +/- 0.51 Gyr.
+
+**Ours (strict):** 13.75 +/- 0.43 Gyr, so +0.36 Gyr, 0.6σ combined against his 2D KS.
+
+**Inside his prior box** (mu 15.3-15.6, E(V-I) 0.08-0.15; `EVI_MIN=0.08 EVI_MAX=0.15 MU_MIN=15.3 MU_MAX=15.6
+POST_SUFFIX=_yingbox ../m15f_statistics.py`, written to `../m15_final_mc_refined/posterior_*_yingbox/`). The grid's E
+reaches 0.12.
+- Best fit 0.01414 (2.5σ).
+- strict 14.21 +/- 0.18 Gyr (12 runs), shifted 13.89 +/- 0.84, scaled 13.32 +/- 0.94.
+- E 0.088-0.093, mu 15.53-15.55.
+
+His reddening floor does not explain the difference. As before (`../m15_ying_isochrones`, `../m15_yingiso_nozp`), the
+isochrones are the main lever.
