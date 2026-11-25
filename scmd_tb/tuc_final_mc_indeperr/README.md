@@ -52,3 +52,26 @@ driver itself was not edited.
   fit's own bootstrap null.
 - After `run.sh`, it writes `compare_500.txt`: production (996, Monte Carlo off), joint 996, joint 500 and
   independent 500.
+
+## Grid finished, run 10128 left out (2026-11-25)
+
+**What happened.**
+- The grid ran 2026-11-24 16:39 to 2026-11-25 09:18; the cluster was nearly full, so few workers ran at first.
+- One grid unit failed: 10128_9.8-10.6 (`logs/11178405_137.out`). For one synthetic sCMD, the ridge traced inside the
+  magnitude window came back empty, and `np.interp` failed with "fp and xp are not of the same length"
+  (`ridge.py`, `Ridge.__init__`). The same run's unit succeeded with joint errors, so the cause is this draw of
+  independent errors, not the isochrone.
+- Refinement finished the other 3,499 units. `run.sh` then stopped at `refine.py merge` (`|| exit 1`), because merge
+  refuses to run with a unit missing. `joint500.sh` saw the driver end and wrote a comparison without the
+  independent rows; that file is kept as `compare_500_joint_only.txt`.
+
+**Fix.** Run 10128 is left out, with no code change:
+- `runs.txt` now holds 499 runs; the 500 are in `runs_500.txt`.
+- 10128 is a poor fit in both models. Its joint-error best KS is 0.0244, above every joint cut (scaled 0.0175), so it
+  carries no weight in `joint500/`. The joint 500-run posteriors are therefore exactly those of these 499 runs, and
+  the pairing still holds.
+- `resume.sh` (log `resume.log`, PID `resume.pid`) is `run.sh` from the merge on. It also writes `compare_500.txt`,
+  with the independent leg labelled `independent_499`.
+
+**Merge.** 22,038 of 30,439 (run, age) cells improved. The best KS is 0.01595 on the grid and 0.01590 refined, at run
+10202, 10.6 Gyr, mu 13.44, E 0.004. The joint-error best is 0.00891.
