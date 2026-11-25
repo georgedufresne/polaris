@@ -135,3 +135,19 @@ The user asked to repeat with 1000 runs and a different seed. `runs_1000.txt` ho
     small. It is not only noise in the minimum.
   - His +/- 0.39 Gyr still cannot be reproduced: every fit is about 9.5 sigma outside his null, and his weighting
     concentrates on one isochrone.
+
+## Caveat found 2026-11-25 (while building `../tuc_martin_replica_mc`): two inputs differ from his M15 set-up
+
+1. **SGB alignment of the artificial-star bins.**
+   - MakeTestCMD aligns the artificial-star magnitude bins to each isochrone's subgiant point using
+     `SGBartStar` in `define_errors.f90`. That value is hard-wired per cluster: his `TestCMDPAR.sh` copies
+     `define_errors.f90` from a per-cluster directory.
+   - The copy we have, used unchanged here, has [-13.7, -13.553].
+   - His `M15_AS_test.ipynb` gives, for M15, V_SGB - V_diff = 18.64 - 31.638 = -12.998 and
+     18.64 - 0.538 - 30.910 = -12.808.
+   - So this replica probably took each synthetic star's completeness and errors from artificial stars about
+     0.7 mag brighter than his M15 run did. That means smaller errors.
+2. **deltaMag.** `runsCMD.py` passes 2.0 for the Voronoi method and 3.0 for KS2d. This replica used 2.0.
+
+The 13.2 Gyr result above is therefore not yet his exact KS set-up. A rerun with [-12.998, -12.808] and deltaMag 3.0
+would settle it; it has not been run.
