@@ -22,6 +22,17 @@ skipped_blocks.csv, if it has fewer than 100 points or does not reach 3 mag abov
 Checks per block: npts <= 999; mass strictly increasing; the bluest point (his turn-off) is a main-sequence/turn-off
 point (log g > 3.5) and lies before the end; every header parses back with his fixed columns; the written rows read
 back to within 5e-7 mag of the pipeline's values.
+Dense resampling (added 2026-11-26 after the first grid): our isochrones sit on a coarse EEP grid (e.g. run 10043 at
+14 Gyr has 22 main-sequence points, with a > 1 mag gap between two of them). MakeTestCMD assumes dense points: its
+binary searches (locate) for SGB + deltaMag + 1 returned -1 there, indxmin became -2, isomass(-2) was read out of
+bounds and the sCMD came out with 0-13,000 stars (20% of the 6,909 units of the first grid, kept in results_try1/);
+its lininterp on a descending x also takes the segment one before the right one, which only matters when points are
+far apart. Our pipeline interpolates V and I linearly in mass (interp1d in ast.make_scmd_ast), so each segment is
+cut into k equal mass steps (k from |dV| <= 0.02 and |d(V-I)| <= 0.004 mag, tolerances widened until a block has at
+most 990 points, and no mass step below 5e-7 for single precision): the curve is our pipeline's exactly. If F606W
+turns fainter again at the RGB tip, the block ends at its brightest point (>= 1 mag above the fit window). A Python
+copy of findFitPoints (with its slice lengths) then checks every block: fit and sampling indices inside the array,
+fit edges within 0.05 mag of SGB +/- 3. Blocks that fail are skipped and listed.
 Output: iso/feh077cmd.<run> here, ages_per_run.json, logs/write_martin_isochrones_tuc.out."""
 import json
 import os
@@ -47,10 +58,77 @@ def fortran_header(s):
     return int(s[1:4].replace(" ", "")), float(s[21:28].replace(" ", ""))
 
 
+def locate(xx, x):
+    """MakeTestCMD's locate (1-based result, -1 outside the end points)."""
+    n = len(xx)
+    asc = xx[-1] >= xx[0]
+    jl, ju = 0, n + 1
+    while ju - jl > 1:
+        jm = (ju + jl) // 2
+        if asc == (x >= xx[jm - 1]):
+            jl = jm
+        else:
+            ju = jm
+    if x == xx[0]:
+        return 1
+    if x == xx[-1]:
+        return n - 1
+    if (asc and (x > xx[-1] or x < xx[0])) or (not asc and (x < xx[-1] or x > xx[0])):
+        return -1
+    return jl
+
+
+def martin_lininterp(x, y, xv):
+    """MakeTestCMD's lininterp (scalar), including its descending-branch bracket."""
+    if x[-1] >= x[0]:
+        if xv <= x[0]:
+            return y[0]
+        if xv >= x[-1]:
+            return y[-1]
+        i = locate(x, xv)
+        return (y[i] - y[i - 1]) / (x[i] - x[i - 1]) * (xv - x[i - 1]) + y[i - 1]
+    if xv <= x[-1]:
+        return y[-1]
+    if xv >= x[0]:
+        return y[0]
+    i = locate(x, xv)
+    return (y[i - 1] - y[i - 2]) / (x[i - 1] - x[i - 2]) * (xv - x[i - 2]) + y[i - 2]
+
+
+def find_fit_points(V, VI, dmag=3.0):
+    """findFitPoints as compiled (1-based indices; the Fortran passes n = niso - ito etc., one short of the slice)."""
+    n = len(V)
+    ito = int(np.argmin(VI)) + 1
+    nmax = min(100, n - ito)
+    vsgb = martin_lininterp(VI[ito - 1:ito - 1 + nmax], V[ito - 1:ito - 1 + nmax], VI[ito - 1] + 0.05)
+    fmin = locate(V[:ito], vsgb + dmag)
+    fmax = ito + locate(V[ito - 1:ito - 1 + n - ito], vsgb - dmag)
+    imin = locate(V[:max(fmin, 1)], vsgb + dmag + 1) - 1
+    l = locate(V[fmax - 1:fmax - 1 + n - fmax], vsgb - dmag - 1) if fmax >= 1 else -1
+    return ito, vsgb, fmin, fmax, imin, fmax + l + 1
+
+
+def densify(mass, v, imag):
+    """Cut each segment into k equal mass steps (linear in mass, as our pipeline interpolates)."""
+    dv, dc, dm = np.abs(np.diff(v)), np.abs(np.diff(v - imag)), np.diff(mass)
+    kcap = np.maximum(1, np.floor(dm / 5e-7)).astype(int)
+    for scale in (1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 15, 20):
+        k = np.minimum(np.maximum(1, np.ceil(np.maximum(dv / (0.02 * scale), dc / (0.004 * scale)))).astype(int), kcap)
+        if 1 + k.sum() <= 990:
+            break
+    assert 1 + k.sum() <= 990
+    t = np.concatenate([np.arange(kk) / kk for kk in k] + [[0.0]])
+    j = np.concatenate([np.full(kk, q) for q, kk in enumerate(k)] + [[len(k) - 1]]).astype(int)
+    t[-1] = 1.0
+    f = lambda y: y[j] + t * (y[j + 1] - y[j])                         # noqa: E731
+    return f(mass), f(v), f(imag), scale
+
+
 runs = [int(x) for x in open(f"{E}/runs.txt").read().split()]
 nblk, nfiles, worst = 0, 0, 0.0
 per_run = {}
 skipped = []
+ntrim, scales, npts_in, npts_out = [0], [], [], []
 for r in runs:
     iso = read_isochrones(setup["iso"].format(run=r))
     txt, blocks, ages_written = [], [], []
@@ -75,16 +153,31 @@ for r in runs:
         assert np.all(np.diff(mass) > 0), (r, a, "mass not increasing")
         ito = int(np.argmin(vi))
         assert logg[ito] > 3.5 and ito < n - 5, (r, a, ito, n)
-        seg = slice(ito, min(ito + 101, n))
-        vsgb = np.interp(vi[ito] + 0.05, vi[seg], v[seg])
-        if v.min() > vsgb - 3.0 or v[:ito].max() < vsgb + 4.0:
-            skipped.append((r, a, n, f"range: Vsgb {vsgb:.2f}, V {v.min():.2f} to {v[:ito].max():.2f}"))
+        ib = ito + int(np.argmin(v[ito:]))                     # brightest F606W above the turn-off
+        if ib < n - 1:
+            ntrim[0] += 1
+            v, vi, mass = v[:ib + 1], vi[:ib + 1], mass[:ib + 1]
+        n0 = len(v)
+        mass, v, imag, scale = densify(mass, v, v - vi)
+        vi = v - imag
+        n = len(v)
+        scales.append(scale)
+        assert np.all(np.diff(mass.astype(np.float32)) > 0), (r, a, "mass steps vanish in single precision")
+        ito1, vsgb, fmin, fmax, imin, imax = find_fit_points(v, vi)
+        good = fmin >= 1 and fmax > ito1 and imin >= 1 and imax <= n
+        if good:
+            good = abs(v[fmin - 1] - (vsgb + 3)) < 0.05 and abs(v[fmax - 1] - (vsgb - 3)) < 0.05
+        if not good:
+            skipped.append((r, a, n, f"findFitPoints: ito {ito1} fit {fmin}-{fmax} sample {imin}-{imax} of {n}, "
+                                     f"Vsgb {vsgb:.2f}"))
             continue
         hdr = f"#{n:3d}{0.0:9.6f}{0.0:8.4f}{a * 1000:6.0f}."
         assert len(hdr) == 28
-        body = [f"{k + 1} {mass[k]:.6f} {v[k]:.6f} {vi[k]:.6f}" for k in range(n)]
+        body = [f"{k + 1} {mass[k]:.8f} {v[k]:.6f} {vi[k]:.6f}" for k in range(n)]
         txt += [f"#NPTS {n}", hdr, "# EEP Mass F606W F606W-F814W", *body, "", ""]
         blocks.append((n, a, v, vi, mass))
+        npts_in.append(n0)
+        npts_out.append(n)
         ages_written.append(round(a * 1000))
     assert len(blocks) <= 100
     if not blocks:                     # age limit at or below 8 Gyr (e.g. 10188): no usable age, as in our fit
@@ -99,7 +192,7 @@ for r in runs:
         assert hn == n and abs(hage - a * 1000) < 0.01, (r, L[i + 1])
         d = np.array([[float(x) for x in s.split()] for s in L[i + 3:i + 3 + n]])
         worst = max(worst, np.abs(d[:, 2] - v).max(), np.abs(d[:, 3] - vi).max())
-        assert np.abs(d[:, 1] - mass).max() < 5e-7
+        assert np.abs(d[:, 1] - mass).max() < 5e-9
         assert L[i + 3 + n] == "" and L[i + 4 + n] == ""
         i += 5 + n
         nblk += 1
@@ -109,7 +202,9 @@ for r in runs:
 json.dump(per_run, open(f"{E}/ages_per_run.json", "w"))
 import pandas as pd                                                   # noqa: E402
 pd.DataFrame(skipped, columns=["simulation_id", "age_gyr", "npts", "reason"]).to_csv(f"{E}/skipped_blocks.csv", index=False)
-print(f"skipped blocks: {len(skipped)} (skipped_blocks.csv)")
+print(f"skipped blocks: {len(skipped)} (skipped_blocks.csv); RGB tip trimmed in {ntrim[0]} blocks; points per block "
+      f"{np.median(npts_in):.0f} -> {np.median(npts_out):.0f} (median), {max(npts_out)} max; tolerance scale "
+      f"1 in {np.mean(np.array(scales) == 1):.0%} of blocks, at most {max(scales)}")
 n41 = sum(1 for k in per_run.values() if len(k) == 41)
 n0 = sum(1 for k in per_run.values() if not k)
 print(f"{nfiles} files, {nblk} age blocks in {OUT}; {n41} runs have all 41 ages, the rest stop at their age limit "

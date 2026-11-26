@@ -16,7 +16,8 @@ Per (run, age) unit:
 The observed stars are reordered by (v, vi) after their ECDF is computed in file order. The KS values are
 bit-identical and 77x faster (speed_test.py).
 Deviations, all forced: random_state is set per unit (crc32 of "run:age") so a unit can be rerun (his is unseeded);
-an evaluation that is not finite returns 1.0 instead of stopping the search; MakeTestCMD's own seed is the clock's
+an evaluation that is not finite, or that raises because no observed star has a non-zero model ECDF (his
+evaluate indexes an empty array), returns 1.0 instead of stopping the search; MakeTestCMD's own seed is the clock's
 milliseconds, as in his code.
 
 Output (appended unit by unit, so the array can be resubmitted): results/task_NNN.csv (best fit per unit) and
@@ -68,7 +69,10 @@ class KS(mk.KS_2d):
         return len(self.fit_values)
 
     def safe(self, theta):
-        v = self.evaluate(theta)
+        try:
+            v = self.evaluate(theta)
+        except (IndexError, ValueError):     # no observed star with a non-zero model ECDF (sCMD misses the window)
+            return 1.0
         return float(v) if np.isfinite(v) else 1.0
 
 

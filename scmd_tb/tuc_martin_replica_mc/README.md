@@ -59,3 +59,44 @@ The forced deviations are those of the M15 replica:
 4. `analyze_replica_tuc.py` -> `logs/analyze_replica_tuc.out`, `compare_pipelines.txt`.
 
 Expected time is about 6.5 hours with all 270 workers running.
+
+## First grid failed: our isochrones are too sparse for MakeTestCMD (2026-11-26)
+
+**What happened.**
+- All 318 grid tasks crashed (array 11202843/44). Each died at the first unit where his `KS_2d.evaluate` indexed
+  an empty array, which happens when no observed star has a non-zero model ECDF.
+- 6,909 of 40,482 units had finished. Of those, 1,391 (20%) had sCMDs of 3-13,000 stars instead of about 1.8 million.
+- The "best fit" (run 10348, 15.6 Gyr, KS 0.0074) was one of these, with 146 stars. The null could not draw 46,538
+  stars from it.
+
+**Cause.** Shown with a debug copy of MakeTestCMD that prints its indices (scratchpad, not kept).
+- Our isochrones sit on a coarse EEP grid. Run 10043 at 14 Gyr has 22 main-sequence points, with a gap of more than
+  1 mag between two of them (F606W 7.93 to 6.75).
+- `findFitPoints` finds SGB + deltaMag + 1 by bisection (`locate`) inside `VV(1:fitindxmin)`. There it returned -1,
+  so `indxmin` = -2 and `isomass(-2)` was read out of bounds.
+- His `lininterp` on a descending x also uses the segment one before the bracketing one. That is harmless with his
+  isochrones, which have about 540 points, but not with ours.
+- His isochrones are densely sampled (0.002 Msun steps on the main sequence), so his code never meets this.
+
+**Fix** (`write_martin_isochrones_tuc.py`, docstring).
+- Each segment is cut into equal mass steps: |dV| <= 0.02 and |d(V-I)| <= 0.004 mag, at most 990 points per block,
+  no mass step below 5e-7. Our pipeline interpolates V and I linearly in mass, so the curve is exactly the one our
+  pipeline uses.
+- The block ends at the brightest F606W point if the RGB tip turns fainter again. That is at least 1 mag above the
+  fit window.
+- A Python copy of `findFitPoints`, with its slice lengths, checks every block.
+- Test (4 runs, 164 blocks; the four units above): 203 -> 806 points per block (median), 0 skipped. MakeTestCMD
+  keeps 54% of draws, with fit edges at SGB +/- 3 (0.739 and 6.760 for a target of 0.75 and 6.75).
+
+**Worker.** `safe()` now also returns 1.0 when his `evaluate` raises on an empty comparison, so one bad
+evaluation cannot kill a task. It is a forced deviation, like the non-finite case.
+
+**Moved aside.** Everything from the first attempt is in `try1_sparse/`: iso/, results/, combined_results.csv,
+logs, pilot_results, driver.log. The pilot KS values in the table above came from the sparse isochrones and are
+superseded too.
+
+**Rerun:** `driver2.sh` (log `driver2.log`).
+1. It writes the dense isochrones, then runs the grid.
+2. After 400 units it stops everything if more than 2% of sCMDs have fewer than 1,000,000 stars.
+3. If tasks vanish it resubmits once, then runs the null and the analysis.
+4. It stops instead of carrying on with missing units or a missing null.
