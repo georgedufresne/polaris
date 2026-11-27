@@ -100,3 +100,46 @@ superseded too.
 2. After 400 units it stops everything if more than 2% of sCMDs have fewer than 1,000,000 stars.
 3. If tasks vanish it resubmits once, then runs the null and the analysis.
 4. It stops instead of carrying on with missing units or a missing null.
+
+## Results (driver2 "all done" 2026-11-26 22:28; `logs/analyze_replica_tuc.out`, `compare_pipelines.txt`)
+
+**Grid.** 40,482 of 40,482 units, 16:10-22:18. 240 physics + 32 free tasks. No unit had an sCMD below 1.84 million
+stars.
+
+**Null.** 10,000 sets at the best unit: 0.00369 +/- 0.00096, maximum 0.00838, 3σ line 0.00656.
+
+**Best fit.** KS 0.01260 at run 10567 (our pipeline's best run too), 10.8 Gyr, DM 13.449, E 0.037. That is 9.3σ
+above his null, as in the M15 replica (9.4σ). No run is within 3σ.
+
+**Best KS by age** (null sd 0.00096, about the noise of one fit in the M15 replica):
+
+| age (Gyr) | 10.2 | 10.4 | 10.6 | 10.8 | 11.0 | 11.2 | 11.6 | 12.0 | 12.2 | 12.6 | 13.0 | 13.6 | 14.0 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| best KS | 0.0144 | 0.0140 | 0.0136 | 0.0126 | 0.0131 | 0.0128 | 0.0130 | 0.0127 | 0.0126 | 0.0129 | 0.0141 | 0.0147 | 0.0143 |
+| best DM | 13.449 | 13.448 | 13.450 | 13.449 | 13.449 | 13.412 | 13.407 | 13.346 | 13.333 | 13.320 | 13.310 | 13.313 | 13.267 |
+
+- The valley is flat from 10.8 to 12.6 Gyr, within 0.5 null sd of the best. 10.8, 12.0 and 12.2 tie to 5e-5.
+  Within one null sd it runs from 10.8 to 12.8.
+- The fits at 10.0-11.4 Gyr sit on his box edge, DM 13.45. 30% of all units end at DM >= 13.44 and 32% at
+  E >= 0.049. Our pipeline's best is at mu 13.49, outside his box. The box cuts off the younger, more distant
+  solutions.
+
+**Posteriors under his rules** (the papers give no formula; as in `../m15_martin_replica`):
+- KDE density of the null: 10.81 +/- 0.11, all weight on one run.
+- Fitted-normal density: 11.54 +/- 0.61 per isochrone (2.6 effective runs), 11.37 +/- 0.64 per run.
+- Survival fraction and the M92 3σ rule give zero weight: no fit is inside his null.
+
+**Comparison (Gyr):**
+
+| | age | DM | E(V-I) |
+|---|---|---|---|
+| Ying et al. 2025, 2D KS | 11.76 +/- 0.76 | 13.40 | 0.02 |
+| his pipeline, our Monte Carlo-on isochrones (this run) | valley 10.8-12.6; best 10.8; normal reading 11.4-11.5 +/- 0.6 | 13.33-13.45 | 0.01-0.04 |
+| our pipeline, same isochrones, his box (`../tuc_final_mc_refined`, strict_D17) | 11.72 +/- 0.66 | 13.39 | 0.020 |
+
+**Conclusion.**
+- On the same isochrones, his pipeline and ours agree with each other and with his published 11.76: his valley is
+  centred near 11.7 Gyr.
+- His pipeline cannot narrow the age down. Every fit is about 9σ outside his null, and the 10.8-12.6 Gyr minima
+  are tied within the fit noise. His weighting therefore either collapses onto the single best unit (KDE: 10.8)
+  or spreads over a few runs (normal: 11.4-11.5 +/- 0.6).
